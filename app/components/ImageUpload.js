@@ -1,144 +1,186 @@
 'use client';
 
-import { useState } from 'react';
-import Image from 'next/image';
+import { useState, useRef } from 'react';
+import { FaUpload, FaTimes, FaSpinner } from 'react-icons/fa';
 
-export default function ImageUpload({
-  currentImage = '/icons/user-placeholder.png',
-  onImageUpload,
-  onImageChange,
-  size = 'medium', // small, medium, large
-  shape = 'circle', // circle, square, rounded
-  showUploadButton = true,
-  uploadButtonPosition = 'bottom-right', // bottom-right, top-right, center
-  folder = 'doctar/general',
-  transformation = 'profile',
-  disabled = false,
-  className = '',
-  alt = 'Profile Image'
-}) {
-  const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState('');
-  const [previewImage, setPreviewImage] = useState(currentImage);
+const ImageUpload = ({ 
+  images = [], 
+  onImagesChange, 
+  maxImages = 5, 
+  folder = 'doctar/blogs',
+  className = ''
+}) => {
+  const [uploading, setUploading] = useState(false);
+  const [dragOver, setDragOver] = useState(false);
+  const fileInputRef = useRef(null);
 
-  // Size configurations
-  const sizeConfig = {
-    small: { container: 'w-8 h-8', button: 'w-4 h-4', icon: 'w-2 h-2' },
-    medium: { container: 'w-12 h-12', button: 'w-6 h-6', icon: 'w-3 h-3' },
-    large: { container: 'w-20 h-20', button: 'w-8 h-8', icon: 'w-4 h-4' }
-  };
-
-  // Shape configurations
-  const shapeConfig = {
-    circle: 'rounded-full',
-    square: 'rounded-none',
-    rounded: 'rounded-lg'
-  };
-
-  // Upload button position configurations
-  const positionConfig = {
-    'bottom-right': '-bottom-1 -right-1',
-    'top-right': '-top-1 -right-1',
-    'center': 'inset-0'
-  };
-
-  const handleFileChange = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    // Validate file type
-    const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp'];
-    if (!allowedTypes.includes(file.type)) {
-      setError('Invalid file type. Only JPEG, PNG, and WebP images are allowed.');
+  const handleFileSelect = async (files) => {
+    if (!files || files.length === 0) return;
+    
+    const fileArray = Array.from(files);
+    const remainingSlots = maxImages - images.length;
+    const filesToUpload = fileArray.slice(0, remainingSlots);
+    
+    if (filesToUpload.length === 0) {
+      alert(`Maximum ${maxImages} images allowed`);
       return;
     }
 
-    // Validate file size (5MB limit for all images)
-    const maxSize = 5 * 1024 * 1024; // 5MB
-    if (file.size > maxSize) {
-      setError('File size too large. Maximum size is 5MB.');
-      return;
-    }
-
-    setIsUploading(true);
-    setError('');
-
+    setUploading(true);
+    
     try {
-      const formData = new FormData();
-      formData.append('image', file);
-      formData.append('folder', folder);
-      formData.append('transformation', transformation);
-
-      const response = await fetch('/api/upload/image', {
-        method: 'POST',
-        body: formData,
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.error || 'Failed to upload image');
-      }
-
-      // Update preview immediately
-      setPreviewImage(result.imageUrl);
-
-      // Call the callback functions
-      if (onImageUpload) {
-        onImageUpload(result);
-      }
-      if (onImageChange) {
-        onImageChange(result.imageUrl, result.publicId);
-      }
-
+      const uploadPromises = filesToUpload.map(file => uploadImage(file));
+      const uploadedImages = await Promise.all(uploadPromises);
+      
+      const newImages = [...images, ...uploadedImages];
+      onImagesChange(newImages);
     } catch (error) {
-      console.error('Image upload error:', error);
-      setError(error.message || 'Failed to upload image');
+      console.error('Upload error:', error);
+      alert('Failed to upload images. Please try again.');
     } finally {
-      setIsUploading(false);
+      setUploading(false);
     }
+  };
+
+  const uploadImage = async (file) => {
+    const formData = new FormData();
+    formData.append('image', file);
+    formData.append('folder', folder);
+    formData.append('transformation', 'gallery');
+
+    const response = await fetch('/api/upload/image', {
+      method: 'POST',
+      body: formData,
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json();
+      throw new Error(errorData.error || 'Upload failed');
+    }
+
+    const result = await response.json();
+    return result.imageUrl;
+  };
+
+  const removeImage = (index) => {
+    const newImages = images.filter((_, i) => i !== index);
+    onImagesChange(newImages);
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+    setDragOver(true);
+  };
+
+  const handleDragLeave = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+  };
+
+  const handleDrop = (e) => {
+    e.preventDefault();
+    setDragOver(false);
+    const files = e.dataTransfer.files;
+    handleFileSelect(files);
+  };
+
+  const handleFileInputChange = (e) => {
+    const files = e.target.files;
+    handleFileSelect(files);
+  };
+
+  const openFileDialog = () => {
+    fileInputRef.current?.click();
   };
 
   return (
-    <div className={`relative ${className}`}>
-      {/* Image Container */}
-      <div className={`${sizeConfig[size].container} ${shapeConfig[shape]} overflow-hidden bg-gray-200`}>
-        <Image
-          src={previewImage}
-          alt={alt}
-          width={size === 'small' ? 32 : size === 'medium' ? 48 : 80}
-          height={size === 'small' ? 32 : size === 'medium' ? 48 : 80}
-          className="w-full h-full object-cover"
-          unoptimized
+    <div className={`space-y-4 ${className}`}>
+      {/* Upload Area */}
+      <div
+        className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+          dragOver
+            ? 'border-purple-500 bg-purple-50'
+            : 'border-gray-300 hover:border-gray-400'
+        } ${uploading ? 'opacity-50 pointer-events-none' : 'cursor-pointer'}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+        onClick={openFileDialog}
+      >
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/*"
+          onChange={handleFileInputChange}
+          className="hidden"
         />
+        
+        {uploading ? (
+          <div className="flex flex-col items-center">
+            <FaSpinner className="h-8 w-8 text-purple-600 animate-spin mb-2" />
+            <p className="text-sm text-gray-600">Uploading images...</p>
+          </div>
+        ) : (
+          <div className="flex flex-col items-center">
+            <FaUpload className="h-8 w-8 text-gray-400 mb-2" />
+            <p className="text-sm font-medium text-gray-900">
+              {images.length === 0 ? 'Upload images' : 'Add more images'}
+            </p>
+            <p className="text-xs text-gray-500 mt-1">
+              Drag and drop or click to select ({images.length}/{maxImages})
+            </p>
+            <p className="text-xs text-gray-400 mt-1">
+              PNG, JPG, WebP up to 5MB each
+            </p>
+          </div>
+        )}
       </div>
 
-      {/* Upload Button */}
-      {showUploadButton && !disabled && (
-        <label className={`absolute ${positionConfig[uploadButtonPosition]} ${sizeConfig[size].button} bg-[#5f4191] ${shapeConfig[shape]} flex items-center justify-center cursor-pointer hover:bg-[#4d3374] transition-colors`}>
-          <input
-            type="file"
-            accept="image/*"
-            onChange={handleFileChange}
-            className="hidden"
-            disabled={isUploading}
-          />
-          {isUploading ? (
-            <div className={`${sizeConfig[size].icon} border-2 border-white border-t-transparent rounded-full animate-spin`}></div>
-          ) : (
-            <svg className={`${sizeConfig[size].icon} text-white`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-            </svg>
-          )}
-        </label>
+      {/* Image Preview Grid */}
+      {images.length > 0 && (
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+          {images.map((imageUrl, index) => (
+            <div key={index} className="relative group">
+              <img
+                src={imageUrl}
+                alt={`Upload ${index + 1}`}
+                className="w-full h-24 object-cover rounded-lg border border-gray-200"
+              />
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  removeImage(index);
+                }}
+                className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+              >
+                <FaTimes className="h-3 w-3" />
+              </button>
+            </div>
+          ))}
+        </div>
       )}
 
-      {/* Error Message */}
-      {error && (
-        <div className="absolute -bottom-6 left-0 right-0 text-xs text-red-600 text-center">
-          {error}
+      {/* Image URLs Display (for editing) */}
+      {images.length > 0 && (
+        <div className="space-y-2">
+          <label className="block text-sm font-medium text-gray-700">
+            Image URLs (one per line):
+          </label>
+          <textarea
+            value={images.join('\n')}
+            onChange={(e) => {
+              const urls = e.target.value.split('\n').filter(url => url.trim());
+              onImagesChange(urls);
+            }}
+            rows={Math.min(images.length, 4)}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm"
+            placeholder="Image URLs will appear here..."
+          />
         </div>
       )}
     </div>
   );
-}
+};
+
+export default ImageUpload;

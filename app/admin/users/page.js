@@ -4,84 +4,84 @@ import React, { useState, useEffect } from 'react';
 import { AdminService } from '../../services/adminService';
 import ViewModal from '../../components/ViewModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
-import SimpleModal from '../../components/SimpleModal';
 
-const DoctorManagementPage = () => {
-  const [doctors, setDoctors] = useState([]);
-  const [filteredDoctors, setFilteredDoctors] = useState([]);
+const UserManagementPage = () => {
+  const [users, setUsers] = useState([]);
+  const [filteredUsers, setFilteredUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-  const [selectedDoctor, setSelectedDoctor] = useState(null);
+  const [selectedUser, setSelectedUser] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [stats, setStats] = useState({
-    approved: 0,
-    pending: 0,
-    rejected: 0,
+    active: 0,
+    inactive: 0,
+    verified: 0,
     total: 0
   });
 
   useEffect(() => {
-    fetchDoctors();
+    fetchUsers();
   }, []);
 
   useEffect(() => {
-    filterDoctors();
-  }, [doctors, searchTerm, statusFilter]);
+    filterUsers();
+  }, [users, searchTerm, statusFilter]);
 
-  const fetchDoctors = async () => {
+  const fetchUsers = async () => {
     try {
       setLoading(true);
-      const response = await AdminService.getDoctors(1, 100); // Get all doctors
+      const response = await AdminService.getUsers(1, 100); // Get all users
       if (response.success) {
-        setDoctors(response.data.doctors);
-        calculateStats(response.data.doctors);
+        setUsers(response.data.patients);
+        calculateStats(response.data.patients);
       }
     } catch (err) {
-      console.error('Error fetching doctors:', err);
-      setError('Failed to load doctors');
+      console.error('Error fetching users:', err);
+      setError('Failed to load users');
     } finally {
       setLoading(false);
     }
   };
 
-  const calculateStats = (doctorsList) => {
-    const approved = doctorsList.filter(d => d.isActive && d.isEmailVerified).length;
-    const pending = doctorsList.filter(d => !d.isEmailVerified).length;
-    const rejected = doctorsList.filter(d => !d.isActive && d.isEmailVerified).length;
-    const total = doctorsList.length;
+  const calculateStats = (usersList) => {
+    const active = usersList.filter(u => u.isActive).length;
+    const inactive = usersList.filter(u => !u.isActive).length;
+    const verified = usersList.filter(u => u.isEmailVerified).length;
+    const total = usersList.length;
 
-    setStats({ approved, pending, rejected, total });
+    setStats({ active, inactive, verified, total });
   };
 
-  const filterDoctors = () => {
-    let filtered = doctors;
+  const filterUsers = () => {
+    let filtered = users;
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(doctor => 
-        doctor.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.specialization?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.clinicName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        doctor.location?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(user => 
+        user.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.phone?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.location?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     // Status filter
     if (statusFilter !== 'all') {
-      if (statusFilter === 'approved') {
-        filtered = filtered.filter(d => d.isActive && d.isEmailVerified);
-      } else if (statusFilter === 'pending') {
-        filtered = filtered.filter(d => !d.isEmailVerified);
-      } else if (statusFilter === 'rejected') {
-        filtered = filtered.filter(d => !d.isActive && d.isEmailVerified);
+      if (statusFilter === 'active') {
+        filtered = filtered.filter(u => u.isActive);
+      } else if (statusFilter === 'inactive') {
+        filtered = filtered.filter(u => !u.isActive);
+      } else if (statusFilter === 'verified') {
+        filtered = filtered.filter(u => u.isEmailVerified);
+      } else if (statusFilter === 'unverified') {
+        filtered = filtered.filter(u => !u.isEmailVerified);
       }
     }
 
-    setFilteredDoctors(filtered);
+    setFilteredUsers(filtered);
   };
 
   const handleSearch = (e) => {
@@ -92,93 +92,95 @@ const DoctorManagementPage = () => {
     setStatusFilter(e.target.value);
   };
 
-  const handleViewDoctor = (doctor) => {
-    setSelectedDoctor(doctor);
+  const handleViewUser = (user) => {
+    setSelectedUser(user);
     setIsViewModalOpen(true);
   };
 
   const handleCloseModal = () => {
     setIsViewModalOpen(false);
-    setSelectedDoctor(null);
+    setSelectedUser(null);
   };
 
-  const handleStatusChange = async (action, doctor) => {
-    console.log('Table action clicked:', { action, doctor: doctor._id });
-    setSelectedDoctor(doctor);
+  const handleStatusChange = async (action, user) => {
+    console.log('Table action clicked:', { action, user: user._id });
+    setSelectedUser(user);
     setIsViewModalOpen(true);
   };
 
-  const handleDirectSuspend = async (doctor) => {
+  const handleDirectSuspend = async (user) => {
     const reason = prompt('Enter reason for suspension:');
     if (reason === null) return; // User cancelled
     
     try {
-      console.log('Direct suspend doctor:', { doctorId: doctor._id, reason });
-      await AdminService.suspendDoctor(doctor._id, true, reason);
-      await fetchDoctors();
-      alert('Doctor suspended successfully');
+      console.log('Direct suspend user:', { userId: user._id, reason });
+      await AdminService.suspendUser(user._id, true, reason);
+      await fetchUsers();
+      alert('User suspended successfully');
     } catch (error) {
-      console.error('Error suspending doctor:', error);
-      alert('Failed to suspend doctor: ' + error.message);
+      console.error('Error suspending user:', error);
+      alert('Failed to suspend user: ' + error.message);
     }
   };
 
-  const handleDirectReapprove = async (doctor) => {
+  const handleDirectReapprove = async (user) => {
     const reason = prompt('Enter reason for re-approval:');
     if (reason === null) return; // User cancelled
     
     try {
-      console.log('Direct re-approve doctor:', { doctorId: doctor._id, reason });
-      await AdminService.reapproveDoctor(doctor._id, reason);
-      await fetchDoctors();
-      alert('Doctor re-approved successfully');
+      console.log('Direct re-approve user:', { userId: user._id, reason });
+      await AdminService.suspendUser(user._id, false, reason);
+      await fetchUsers();
+      alert('User re-approved successfully');
     } catch (error) {
-      console.error('Error re-approving doctor:', error);
-      alert('Failed to re-approve doctor: ' + error.message);
+      console.error('Error re-approving user:', error);
+      alert('Failed to re-approve user: ' + error.message);
     }
   };
 
-  const handleDirectDelete = async (doctor) => {
-    const confirmed = confirm(`Are you sure you want to delete Dr. ${doctor.firstName} ${doctor.lastName}? This action cannot be undone.`);
+  const handleDirectDelete = async (user) => {
+    const confirmed = confirm(`Are you sure you want to delete ${user.firstName} ${user.lastName}? This action cannot be undone.`);
     if (!confirmed) return;
     
     try {
-      console.log('Direct delete doctor:', { doctorId: doctor._id });
-      await AdminService.deleteDoctor(doctor._id);
-      await fetchDoctors();
-      alert('Doctor deleted successfully');
+      console.log('Direct delete user:', { userId: user._id });
+      await AdminService.deleteUser(user._id);
+      await fetchUsers();
+      alert('User deleted successfully');
     } catch (error) {
-      console.error('Error deleting doctor:', error);
-      alert('Failed to delete doctor: ' + error.message);
+      console.error('Error deleting user:', error);
+      alert('Failed to delete user: ' + error.message);
     }
   };
 
   const handleStatusChangeFromModal = async (action, reason) => {
     try {
-      console.log('Status change action:', { action, reason, doctorId: selectedDoctor._id });
+      console.log('Status change action:', { action, reason, userId: selectedUser._id });
       
       if (action === 'suspend') {
-        await AdminService.suspendDoctor(selectedDoctor._id, true, reason);
+        await AdminService.suspendUser(selectedUser._id, true, reason);
       } else if (action === 'approve') {
-        await AdminService.approveDoctor(selectedDoctor._id, reason);
+        // For users, approval means activating their account
+        await AdminService.suspendUser(selectedUser._id, false, reason);
       } else if (action === 'reapprove') {
-        await AdminService.reapproveDoctor(selectedDoctor._id, reason);
+        // Re-approve means unsuspending
+        await AdminService.suspendUser(selectedUser._id, false, reason);
       } else if (action === 'delete') {
-        await AdminService.deleteDoctor(selectedDoctor._id);
+        await AdminService.deleteUser(selectedUser._id);
         setIsViewModalOpen(false);
-        setSelectedDoctor(null);
+        setSelectedUser(null);
       }
       
-      // Refresh the doctors list
-      await fetchDoctors();
+      // Refresh the users list
+      await fetchUsers();
       
-      // Update the selected doctor data
-      if (selectedDoctor && action !== 'delete') {
-        const updatedDoctors = await AdminService.getDoctors(1, 100);
-        if (updatedDoctors.success) {
-          const updatedDoctor = updatedDoctors.data.doctors.find(d => d._id === selectedDoctor._id);
-          if (updatedDoctor) {
-            setSelectedDoctor(updatedDoctor);
+      // Update the selected user data
+      if (selectedUser && action !== 'delete') {
+        const updatedUsers = await AdminService.getUsers(1, 100);
+        if (updatedUsers.success) {
+          const updatedUser = updatedUsers.data.patients.find(u => u._id === selectedUser._id);
+          if (updatedUser) {
+            setSelectedUser(updatedUser);
           }
         }
       }
@@ -189,13 +191,13 @@ const DoctorManagementPage = () => {
   };
 
 
-  const getStatusBadge = (doctor) => {
-    if (doctor.isActive && doctor.isEmailVerified) {
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Approved</span>;
-    } else if (!doctor.isEmailVerified) {
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>;
+  const getStatusBadge = (user) => {
+    if (user.isActive && user.isEmailVerified) {
+      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>;
+    } else if (!user.isEmailVerified) {
+      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Unverified</span>;
     } else {
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Rejected</span>;
+      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Inactive</span>;
     }
   };
 
@@ -211,8 +213,26 @@ const DoctorManagementPage = () => {
     });
   };
 
-  const getExperienceLevel = (experience) => {
-    return experience >= 10 ? 'Experienced' : '';
+  const getGenderIcon = (gender) => {
+    if (gender === 'male') {
+      return (
+        <svg className="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      );
+    } else if (gender === 'female') {
+      return (
+        <svg className="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      );
+    } else {
+      return (
+        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+        </svg>
+      );
+    }
   };
 
   if (loading) {
@@ -220,7 +240,7 @@ const DoctorManagementPage = () => {
       <div className="flex items-center justify-center min-h-96">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-purple-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading doctors...</p>
+          <p className="mt-4 text-gray-600">Loading users...</p>
         </div>
       </div>
     );
@@ -230,8 +250,8 @@ const DoctorManagementPage = () => {
     <div className="space-y-6">
       {/* Page Header */}
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Doctor Management</h1>
-        <p className="text-gray-600 mt-1">Manage doctor profiles and verifications.</p>
+        <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+        <p className="text-gray-600 mt-1">Manage patient accounts and verifications.</p>
       </div>
 
       {/* Action Buttons */}
@@ -240,7 +260,7 @@ const DoctorManagementPage = () => {
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
-          <span>Add Doctor</span>
+          <span>Add User</span>
         </button>
         <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,7 +269,7 @@ const DoctorManagementPage = () => {
           <span>Export Data</span>
         </button>
         <button 
-          onClick={fetchDoctors}
+          onClick={fetchUsers}
           className="flex items-center space-x-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -269,9 +289,9 @@ const DoctorManagementPage = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Approved</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.approved}</p>
-              <p className="text-sm text-gray-500">Active doctors</p>
+              <p className="text-sm font-medium text-gray-600">Active</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.active}</p>
+              <p className="text-sm text-gray-500">Active users</p>
             </div>
           </div>
         </div>
@@ -284,9 +304,9 @@ const DoctorManagementPage = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Pending</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
-              <p className="text-sm text-gray-500">Awaiting review</p>
+              <p className="text-sm font-medium text-gray-600">Unverified</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.total - stats.verified}</p>
+              <p className="text-sm text-gray-500">Awaiting verification</p>
             </div>
           </div>
         </div>
@@ -299,9 +319,9 @@ const DoctorManagementPage = () => {
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Rejected</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.rejected}</p>
-              <p className="text-sm text-gray-500">Not approved</p>
+              <p className="text-sm font-medium text-gray-600">Inactive</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.inactive}</p>
+              <p className="text-sm text-gray-500">Suspended accounts</p>
             </div>
           </div>
         </div>
@@ -334,7 +354,7 @@ const DoctorManagementPage = () => {
               </div>
               <input
                 type="text"
-                placeholder="Search doctors by name, specialty, email, or city..."
+                placeholder="Search users by name, email, phone, or location..."
                 value={searchTerm}
                 onChange={handleSearch}
                 className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md leading-5 bg-white placeholder-gray-500 focus:outline-none focus:placeholder-gray-400 focus:ring-1 focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
@@ -348,93 +368,116 @@ const DoctorManagementPage = () => {
               className="block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-purple-500 focus:border-purple-500 sm:text-sm"
             >
               <option value="all">All Status ({stats.total})</option>
-              <option value="approved">Approved ({stats.approved})</option>
-              <option value="pending">Pending ({stats.pending})</option>
-              <option value="rejected">Rejected ({stats.rejected})</option>
+              <option value="active">Active ({stats.active})</option>
+              <option value="inactive">Inactive ({stats.inactive})</option>
+              <option value="verified">Verified ({stats.verified})</option>
+              <option value="unverified">Unverified ({stats.total - stats.verified})</option>
             </select>
           </div>
         </div>
       </div>
 
-      {/* Doctors Table */}
+      {/* Users Table */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="min-w-full divide-y divide-gray-200">
             <thead className="bg-gray-50">
               <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Doctor</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specialty & Location</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Experience</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">User</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact & Location</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender & Age</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Fee</th>
+                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verification</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
-              {filteredDoctors.map((doctor) => (
-                <tr key={doctor._id} className="hover:bg-gray-50">
+              {filteredUsers.map((user) => (
+                <tr key={user._id} className="hover:bg-gray-50">
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                        <span className="text-sm font-medium text-green-800">
-                          {getInitials(doctor.firstName, doctor.lastName)}
+                      <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
+                        <span className="text-sm font-medium text-blue-800">
+                          {getInitials(user.firstName, user.lastName)}
                         </span>
                       </div>
                       <div className="ml-4">
                         <div className="text-sm font-medium text-gray-900">
-                          Dr. {doctor.firstName} {doctor.lastName}
+                          {user.firstName} {user.lastName}
                         </div>
-                        <div className="text-sm text-gray-500">{doctor.email}</div>
-                        <div className="text-sm text-gray-500">{doctor.phone}</div>
+                        <div className="text-sm text-gray-500">{user.email}</div>
+                        <div className="text-sm text-gray-500">{user.phone}</div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{doctor.specialization}</div>
-                    <div className="text-sm text-gray-500">{doctor.location}</div>
-                    <div className="text-sm text-gray-500">{doctor.clinicName}</div>
+                    <div className="text-sm text-gray-900">{user.email}</div>
+                    <div className="text-sm text-gray-500">{user.phone}</div>
+                    <div className="text-sm text-gray-500">{user.location || 'Not specified'}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{doctor.experience} years</div>
-                    {getExperienceLevel(doctor.experience) && (
-                      <div className="text-xs text-blue-600 font-medium">{getExperienceLevel(doctor.experience)}</div>
-                    )}
+                    <div className="flex items-center">
+                      {getGenderIcon(user.gender)}
+                      <span className="ml-2 text-sm text-gray-900 capitalize">{user.gender || 'Not specified'}</span>
+                    </div>
+                    <div className="text-sm text-gray-500">
+                      {user.dateOfBirth ? 
+                        `${new Date().getFullYear() - new Date(user.dateOfBirth).getFullYear()} years old` : 
+                        'Age not specified'
+                      }
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {getStatusBadge(doctor)}
+                    {getStatusBadge(user)}
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                    ₹{doctor.consultationFee}
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="flex items-center">
+                      {user.isEmailVerified ? (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          Verified
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                          </svg>
+                          Pending
+                        </span>
+                      )}
+                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDate(doctor.createdAt)}
+                    {formatDate(user.createdAt)}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
                       <button 
-                        onClick={() => handleViewDoctor(doctor)}
+                        onClick={() => handleViewUser(user)}
                         className="text-blue-600 hover:text-blue-900 font-medium"
                       >
                         View
                       </button>
-                      {doctor.isSuspended ? (
+                      {user.isSuspended ? (
                         <button 
-                          onClick={() => handleDirectReapprove(doctor)}
+                          onClick={() => handleDirectReapprove(user)}
                           className="text-green-600 hover:text-green-900 font-medium"
                         >
                           Re-approve
                         </button>
                       ) : (
                         <button 
-                          onClick={() => handleDirectSuspend(doctor)}
+                          onClick={() => handleDirectSuspend(user)}
                           className="text-yellow-600 hover:text-yellow-900 font-medium"
                         >
                           Suspend
                         </button>
                       )}
                       <button 
-                        onClick={() => handleDirectDelete(doctor)}
+                        onClick={() => handleDirectDelete(user)}
                         className="text-red-600 hover:text-red-900 font-medium"
                       >
                         Delete
@@ -449,16 +492,16 @@ const DoctorManagementPage = () => {
       </div>
 
       {/* Empty State */}
-      {filteredDoctors.length === 0 && !loading && (
+      {filteredUsers.length === 0 && !loading && (
         <div className="text-center py-12">
           <svg className="w-12 h-12 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No doctors found</h3>
+          <h3 className="text-lg font-medium text-gray-900 mb-2">No users found</h3>
           <p className="text-gray-500">
             {searchTerm || statusFilter !== 'all' 
               ? 'Try adjusting your search or filter criteria.' 
-              : 'No doctors have been registered yet.'}
+              : 'No users have been registered yet.'}
           </p>
         </div>
       )}
@@ -486,8 +529,8 @@ const DoctorManagementPage = () => {
       <ViewModal
         isOpen={isViewModalOpen}
         onClose={handleCloseModal}
-        data={selectedDoctor}
-        type="doctor"
+        data={selectedUser}
+        type="user"
         onStatusChange={handleStatusChangeFromModal}
       />
 
@@ -495,4 +538,4 @@ const DoctorManagementPage = () => {
   );
 };
 
-export default DoctorManagementPage;
+export default UserManagementPage;

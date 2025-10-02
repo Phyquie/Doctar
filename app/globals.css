@@ -58,3 +58,11 @@
     .scrollbar-hide::-webkit-scrollbar { 
       display: none;  /* Safari and Chrome */
     }
+
+    /* Prevent horizontal overflow */
+    .break-words {
+      word-wrap: break-word;
+      word-break: break-word;
+      overflow-wrap: break-word;
+      hyphens: auto;
+    }

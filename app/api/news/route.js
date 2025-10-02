@@ -1,9 +1,9 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '../../../lib/mongodb';
-import Blog from '../../../models/blogsModel';
+import News from '../../../models/newsModel';
 import Doctor from '../../../models/Doctor';
 
-// GET /api/blogs - Get all blogs with pagination and search
+// GET /api/news - Get all news with pagination and search
 export async function GET(request) {
   try {
     await connectDB();
@@ -30,20 +30,20 @@ export async function GET(request) {
       query.author = author;
     }
 
-    // Get blogs with author details
-    const blogs = await Blog.find(query)
+    // Get news with author details
+    const news = await News.find(query)
       .populate('author', 'firstName lastName email')
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit);
 
     // Get total count for pagination
-    const total = await Blog.countDocuments(query);
+    const total = await News.countDocuments(query);
 
     return NextResponse.json({
       success: true,
       data: {
-        blogs,
+        news,
         pagination: {
           currentPage: page,
           totalPages: Math.ceil(total / limit),
@@ -54,15 +54,15 @@ export async function GET(request) {
     });
 
   } catch (error) {
-    console.error('Error fetching blogs:', error);
+    console.error('Error fetching news:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to fetch blogs' },
+      { success: false, message: 'Failed to fetch news' },
       { status: 500 }
     );
   }
 }
 
-// POST /api/blogs - Create new blog
+// POST /api/news - Create new news
 export async function POST(request) {
   try {
     await connectDB();
@@ -87,27 +87,27 @@ export async function POST(request) {
       );
     }
 
-    // Create new blog
-    const blog = new Blog({
+    // Create new news
+    const news = new News({
       heading,
       description,
       images,
       author
     });
 
-    await blog.save();
-    await blog.populate('author', 'firstName lastName email');
+    await news.save();
+    await news.populate('author', 'firstName lastName email');
 
     return NextResponse.json({
       success: true,
-      message: 'Blog created successfully',
-      data: blog
+      message: 'News created successfully',
+      data: news
     }, { status: 201 });
 
   } catch (error) {
-    console.error('Error creating blog:', error);
+    console.error('Error creating news:', error);
     return NextResponse.json(
-      { success: false, message: 'Failed to create blog' },
+      { success: false, message: 'Failed to create news' },
       { status: 500 }
     );
   }
