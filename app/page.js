@@ -12,6 +12,7 @@ import NewsGuideSection from './components/NewsGuideSection';
 import BlogSection from './components/BlogSection';
 import TrendingShortsSection from './components/TrendingShortsSection';
 import TrendingVideosSection from './components/TrendingVideosSection';
+import TrendingReelsSection from './components/TrendingReelsSection';
 import TalkWithExpertSection from './components/TalkWithExpertSection';
 import ReviewsSection from './components/ReviewsSection';
 import Footer from './components/Footer';
@@ -57,6 +58,7 @@ export default function Home() {
       <VisionMissionSection />
       <NewsGuideSection />
       <BlogSection />
+      <TrendingReelsSection />
       <TrendingShortsSection />
       <TrendingVideosSection />
       <TalkWithExpertSection />
