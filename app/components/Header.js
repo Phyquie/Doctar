@@ -195,18 +195,24 @@ export default function Header() {
                         >
                           Profile
                         </a>
-                      ) : (
-                        <>
-                          
-                          <a
-                            href="/doctor-profile"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          >
-                            Doctor Profile
-                          </a>
-                          
-                        </>
-                      )}
+                      ) : role === 'doctor' ? (
+                        <a
+                          href="/doctor-profile"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Profile
+                        </a>
+                      ) : role === 'admin' ? (
+                        <a
+                          href="/admin/dashboard"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          Dashboard
+                        </a>
+                      ) : null}
+                      
+                    
+                
                       <div className="border-t border-gray-200">
                         <button
                           onClick={() => {

@@ -9,60 +9,68 @@ const queryItems = [
   {
     id: 1,
     label: "General Physician",
-    icon: "/icons/allopathic.png",
-    specialization: "General Physician"
+    icon: "/icons/general-physician.svg",
+    specialization: "General Physician",
+    apiValue: "general_physician"
   },
   {
     id: 2,
     label: "Cardiologist",
-    icon: "/icons/cardiologist.PNG",
-    specialization: "Cardiologist"
+    icon: "/icons/cardiologist.svg",
+    specialization: "Cardiologist",
+    apiValue: "cardiology"
   },
   {
     id: 3,
     label: "Dentist",
-    icon: "/icons/dentist.png",
-    specialization: "Dentist"
+    icon: "/icons/dentist.svg",
+    specialization: "Dentist",
+    apiValue: "dentistry"
   },
   {
     id: 4,
     label: "Gynecologist",
-    icon: "/icons/gimaecologist.PNG",
-    specialization: "Gynecologist"
+    icon: "/icons/gynecologist.svg",
+    specialization: "Gynecologist",
+    apiValue: "gynecology"
   },
   {
     id: 5,
     label: "Pediatrician",
-    icon: "/icons/general physcisian.PNG",
-    specialization: "Pediatrician"
+    icon: "/icons/pediatrician.svg",
+    specialization: "Pediatrician",
+    apiValue: "pediatric"
   },
   {
     id: 6,
     label: "Dermatologist",
-    icon: "/icons/allopathic.png",
-    specialization: "Dermatologist"
+    icon: "/icons/dermatologist.svg",
+    specialization: "Dermatologist",
+    apiValue: "dermatology"
   },
   {
     id: 7,
     label: "Ayurveda",
-    icon: "/icons/ayurveda.png",
-    specialization: "Ayurveda"
+    icon: "/icons/ayurveda.svg",
+    specialization: "Ayurveda",
+    apiValue: "ayurveda"
   },
   {
     id: 8,
     label: "Homeopathy",
-    icon: "/icons/homeopathic.png",
-    specialization: "Homeopathy"
+    icon: "/icons/homeopathy.svg",
+    specialization: "Homeopathy",
+    apiValue: "homeopathy"
   }
 ];
 
 export default function QuerySection() {
   const router = useRouter();
   const currentLocation = useAppSelector(selectCurrentLocation);
-  const handleSpecializationClick = (specialization) => {
+  const handleSpecializationClick = (specialization, apiValue) => {
     const locationSlug = currentLocation?.name || currentLocation?.city;
     
-    // Generate specialization slug
+    // Generate specialization slug for URL (using display name)
     const specializationSlug = specialization.toLowerCase()
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-')
@@ -75,6 +83,7 @@ export default function QuerySection() {
         .replace(/\s+/g, '-')
         .replace(/-+/g, '-')
         .trim('-');
+      // Pass apiValue as query parameter for backend API calls
       router.push(`/specialist/${specializationSlug}/${formattedLocation}`);
     } else {
       router.push(`/specialist/${specializationSlug}`);
@@ -104,19 +113,18 @@ export default function QuerySection() {
             <div 
               key={item.id} 
               className="flex flex-col items-center group cursor-pointer"
-              onClick={() => handleSpecializationClick(item.specialization)}
+              onClick={() => handleSpecializationClick(item.specialization, item.apiValue)}
             >
-              <div className="w-16 h-16 bg-[#5f4191] rounded-full flex items-center justify-center mb-3 hover:scale-105 transition-all duration-300 group-hover:bg-[#4d3374] group-hover:shadow-lg">
+              <div className="w-16 h-16 rounded-full overflow-hidden mb-3 transition-all duration-300 border-2 border-gray-200 group-hover:border-[#5f4191] group-hover:border-4 group-hover:shadow-lg relative">
                 <Image
                   src={item.icon}
                   alt={item.label}
-                  width={28}
-                  height={28}
-                  className="object-contain filter brightness-0 invert"
+                  fill
+                  className="object-cover transition-transform duration-300 group-hover:scale-110"
                   unoptimized
                   onError={(e) => {
                     console.log(`Failed to load icon: ${item.icon}`);
-                    e.target.src = '/icons/icon.png'; // Fallback icon
+                    e.target.src = '/icons/general-physician.svg'; // Fallback to SVG icon
                   }}
                 />
               </div>

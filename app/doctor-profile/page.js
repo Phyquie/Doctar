@@ -380,26 +380,43 @@ export default function ProtectedDoctorProfilePage() {
 
             {/* Right Content - Tabs */}
             <div className="lg:col-span-2">
-              {/* Tab Navigation */}
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
-                <div className="flex border-b border-gray-200">
-                  {['about', 'reviews', 'contact'].map((tab) => (
-                    <button
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`flex-1 px-6 py-4 text-sm font-medium transition-all duration-300 ${
-                        activeTab === tab
-                          ? 'bg-[#5f4191] text-white'
-                          : 'text-gray-600 hover:text-[#5f4191] hover:bg-purple-50'
-                      }`}
-                    >
-                      {tab.charAt(0).toUpperCase() + tab.slice(1)}
-                    </button>
-                  ))}
-                </div>
-
-                {/* Tab Content */}
+              {/* Tabs */}
+              <div className="bg-white rounded-xl shadow-sm mb-6">
                 <div className="p-6">
+                  {/* Tab Navigation - Single Capsule Toggle */}
+                  <div className="relative bg-gray-100 rounded-full p-1 mb-6 inline-block">
+                    {/* Background slider that moves */}
+                    <div 
+                      className={`absolute top-1 bottom-1 bg-gradient-to-r from-[#5f4191] to-[#4d3374] rounded-full transition-all duration-300 ease-in-out shadow-lg`}
+                      style={{
+                        width: '33.33%', // 3 tabs = 33.33% each
+                        left: `${['about', 'reviews', 'contact'].indexOf(activeTab) * 33.33}%`
+                      }}
+                    />
+                    
+                    {/* Tab buttons */}
+                    <div className="relative flex">
+                      {[
+                        { id: 'about', label: 'About' },
+                        { id: 'reviews', label: `Reviews` },
+                        { id: 'contact', label: 'Contact' }
+                      ].map((tab) => (
+                        <button
+                          key={tab.id}
+                          onClick={() => setActiveTab(tab.id)}
+                          className={`relative z-10 px-6 py-3 rounded-full font-medium text-sm transition-colors duration-300 min-w-0 flex-1 ${
+                            activeTab === tab.id
+                              ? 'text-white'
+                              : 'text-gray-600 hover:text-gray-800'
+                          }`}
+                        >
+                          {tab.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                  {/* Tab Content with Animation */}
+                  <div className="transition-all duration-300 ease-in-out">
                   {/* About Tab */}
                   {activeTab === 'about' && (
                     <div className="space-y-6 animate-fadeIn">
@@ -644,6 +661,7 @@ export default function ProtectedDoctorProfilePage() {
                       </div>
                     </div>
                   )}
+                </div>
                 </div>
               </div>
             </div>

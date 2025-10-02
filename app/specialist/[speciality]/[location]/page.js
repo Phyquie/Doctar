@@ -94,27 +94,28 @@ export default function SpecialistLocationPage() {
 
   // Specializations mapping
   const specializationsMap = {
-    'cardiologist': 'Cardiologist',
-    'dermatologist': 'Dermatologist',
-    'endocrinologist': 'Endocrinologist',
-    'gastroenterologist': 'Gastroenterologist',
-    'gynecologist': 'Gynecologist',
-    'neurologist': 'Neurologist',
-    'oncologist': 'Oncologist',
-    'ophthalmologist': 'Ophthalmologist',
-    'orthopedist': 'Orthopedist',
-    'pediatrician': 'Pediatrician',
-    'psychiatrist': 'Psychiatrist',
-    'pulmonologist': 'Pulmonologist',
-    'urologist': 'Urologist',
-    'general-physician': 'General Physician',
-    'dentist': 'Dentist',
-    'ayurveda': 'Ayurveda',
-    'homeopathy': 'Homeopathy',
-    'physiotherapist': 'Physiotherapist'
+    'cardiologist': { name: 'Cardiologist', value: 'cardiology' },
+    'dermatologist': { name: 'Dermatologist', value: 'dermatology' },
+    'endocrinologist': { name: 'Endocrinologist', value: 'endocrinology' },
+    'gastroenterologist': { name: 'Gastroenterologist', value: 'gastroenterology' },
+    'gynecologist': { name: 'Gynecologist', value: 'gynecology' },
+    'neurologist': { name: 'Neurologist', value: 'neurology' },
+    'oncologist': { name: 'Oncologist', value: 'oncology' },
+    'ophthalmologist': { name: 'Ophthalmologist', value: 'ophthalmology' },
+    'orthopedist': { name: 'Orthopedist', value: 'orthopedics' },
+    'pediatrician': { name: 'Pediatrician', value: 'pediatric' },
+    'psychiatrist': { name: 'Psychiatrist', value: 'psychiatry' },
+    'pulmonologist': { name: 'Pulmonologist', value: 'pulmonology' },
+    'urologist': { name: 'Urologist', value: 'urology' },
+    'general-physician': { name: 'General Physician', value: 'general_physician' },
+    'dentist': { name: 'Dentist', value: 'dentistry' },
+    'ayurveda': { name: 'Ayurveda', value: 'ayurveda' },
+    'homeopathy': { name: 'Homeopathy', value: 'homeopathy' },
+    'physiotherapist': { name: 'Physiotherapist', value: 'physiotherapy' }
   };
 
-  const actualSpecialization = specializationsMap[speciality] || displaySpecialization;
+  const actualSpecialization = specializationsMap[speciality]?.name || displaySpecialization;
+  const apiSpecialization = specializationsMap[speciality]?.value || speciality;
 
   // Fetch doctors with filters
   const fetchDoctors = useCallback(async (page = 1, filters = {}) => {
@@ -123,7 +124,7 @@ export default function SpecialistLocationPage() {
       const params = new URLSearchParams({
         page: page.toString(),
         limit: pagination.limit.toString(),
-        specialization: actualSpecialization, // Filter by specialization
+        specialization: apiSpecialization, // Filter by specialization
         location: searchCityName, // Filter by city name
         ...filters
       });
@@ -143,7 +144,7 @@ export default function SpecialistLocationPage() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.limit, actualSpecialization, searchCityName]);
+  }, [pagination.limit, apiSpecialization, searchCityName]);
 
   // Initial load
   useEffect(() => {
