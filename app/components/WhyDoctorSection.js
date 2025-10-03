@@ -19,24 +19,21 @@ function WhyDoctarSection() {
   ];
 
   return (
-    <div className="flex flex-col  items-center justify-center">
+    <div className="flex flex-col items-center justify-center">
       <h2 className="text-center text-black md:p-4 font-bold py-2 text-xl">
         Why Doctar?
       </h2>
       <div className="flex bg-[#F2F2F2] justify-between rounded-3xl md:p-4 text-sm text-black p-2">
         {features.map((feature, index) => (
           <React.Fragment key={feature.id}>
-
-          <div key={feature.id} className="relative p-1 rounded-md flex-1">
-            <p className="text-black text-[11px] md:text-lg leading-tight font-poppins">
-              {feature.content}
-            </p>
-          </div>
-          {
-            index < features.length - 1 && (
+            <div key={feature.id} className="relative p-1 rounded-md flex-1">
+              <p className="text-black text-[11px] md:text-lg leading-tight font-poppins">
+                {feature.content}
+              </p>
+            </div>
+            {index < features.length - 1 && (
               <div className="left-0 mt-1 md:h-auto h-8 w-1 bg-purple-600 rounded mr-2"></div>
             )}
-          
           </React.Fragment>
         ))}
       </div>

@@ -160,11 +160,11 @@ export default function TrendingVideosSection() {
     const thumbnailUrl = getThumbnailUrl(video);
     
     return (
-      <div key={video._id} className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow w-[320px] h-[380px] hover:shadow-lg transition-shadow duration-300">
+      <div key={video._id} className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow w-[280px] sm:w-[320px] h-[360px] sm:h-[380px] hover:shadow-lg transition-shadow duration-300 flex-shrink-0">
         <div className="relative flex-shrink-0">
           {playingVideo === video._id ? (
             // Video Player when playing
-            <div className="relative w-full h-64 rounded-t-4xl overflow-hidden bg-black">
+            <div className="relative w-full h-48 sm:h-64 rounded-t-4xl overflow-hidden bg-black">
               {(video.iframeUrl) && isYouTubeUrl(video.iframeUrl) ? (
                 // YouTube iframe
                 <iframe
@@ -213,21 +213,21 @@ export default function TrendingVideosSection() {
           ) : (
             // Thumbnail when not playing
             <div 
-              className="relative w-full h-64 cursor-pointer group"
+              className="relative w-full h-48 sm:h-64 cursor-pointer group"
               onClick={() => handleVideoClick(video._id)}
             >
               {video.thumbnail || thumbnailUrl ? (
                 <img 
                   src={thumbnailUrl} 
                   alt={video.title}
-                  className="w-full h-64 object-cover rounded-t-4xl group-hover:opacity-90 transition-opacity"
+                  className="w-full h-48 sm:h-64 object-cover rounded-t-4xl group-hover:opacity-90 transition-opacity"
                   onError={(e) => {
                     e.target.src = '/icons/video-placeholder.png';
                   }}
                 />
               ) : (
-                <div className="w-full h-64 bg-gradient-to-br from-purple-400 to-purple-600 rounded-t-4xl flex items-center justify-center">
-                  <FaPlay className="text-white text-4xl" />
+                <div className="w-full h-48 sm:h-64 bg-gradient-to-br from-purple-400 to-purple-600 rounded-t-4xl flex items-center justify-center">
+                  <FaPlay className="text-white text-3xl sm:text-4xl" />
                 </div>
               )}
               {/* Play button overlay */}
@@ -269,8 +269,8 @@ export default function TrendingVideosSection() {
           )}
         </div>
 
-        <div className="flex-col flex-1 p-4 overflow-hidden">
-          <h3 className="text-lg text-black font-bold line-clamp-2 mb-2 break-words">
+        <div className="flex-col flex-1 p-3 sm:p-4 overflow-hidden">
+          <h3 className="text-base sm:text-lg text-black font-bold line-clamp-2 mb-2 break-words">
             {video.title}
           </h3>
           
@@ -388,9 +388,9 @@ export default function TrendingVideosSection() {
   }
 
   return (
-    <div className="py-8">
-      <div className="flex justify-between items-center mb-6 ml-[30px] mr-[30px]">
-        <h2 className="text-black text-2xl font-bold">{getSectionTitle()}</h2>
+    <div className="py-6 sm:py-8 px-4 sm:px-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-4 sm:mb-6">
+        <h2 className="text-black text-xl sm:text-2xl font-bold mb-2 sm:mb-0">{getSectionTitle()}</h2>
         <Link 
           href="/videos" 
           className="text-purple-600 hover:text-purple-700 font-medium text-sm"
@@ -399,7 +399,7 @@ export default function TrendingVideosSection() {
         </Link>
       </div>
 
-      <div className="flex p-6 overflow-auto scrollbar-hide scroll-smooth gap-4">
+      <div className="flex p-2 sm:p-6 overflow-auto scrollbar-hide scroll-smooth gap-3 sm:gap-4">
         {videos && videos.map(renderVideoCard)}
       </div>
     </div>

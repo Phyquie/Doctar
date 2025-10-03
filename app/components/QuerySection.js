@@ -8,57 +8,29 @@ import { selectCurrentLocation } from '../store/slices/locationSlice';
 const queryItems = [
   {
     id: 1,
-    label: "General Physician",
-    icon: "/icons/general-physician.svg",
-    specialization: "General Physician",
-    apiValue: "general_physician"
+    label: "Allopathic",
+    icon: "/icons/Query/allopathic.PNG",
+    specialization: "Allopathic",
+    apiValue: "allopathic"
   },
   {
     id: 2,
-    label: "Cardiologist",
-    icon: "/icons/cardiologist.svg",
-    specialization: "Cardiologist",
-    apiValue: "cardiology"
+    label: "Ayurveda",
+    icon: "/icons/Query/ayurveda.PNG",
+    specialization: "Ayurveda",
+    apiValue: "ayurveda"
   },
   {
     id: 3,
     label: "Dentist",
-    icon: "/icons/dentist.svg",
+    icon: "/icons/Query/dentist.PNG",
     specialization: "Dentist",
     apiValue: "dentistry"
   },
   {
     id: 4,
-    label: "Gynecologist",
-    icon: "/icons/gynecologist.svg",
-    specialization: "Gynecologist",
-    apiValue: "gynecology"
-  },
-  {
-    id: 5,
-    label: "Pediatrician",
-    icon: "/icons/pediatrician.svg",
-    specialization: "Pediatrician",
-    apiValue: "pediatric"
-  },
-  {
-    id: 6,
-    label: "Dermatologist",
-    icon: "/icons/dermatologist.svg",
-    specialization: "Dermatologist",
-    apiValue: "dermatology"
-  },
-  {
-    id: 7,
-    label: "Ayurveda",
-    icon: "/icons/ayurveda.svg",
-    specialization: "Ayurveda",
-    apiValue: "ayurveda"
-  },
-  {
-    id: 8,
     label: "Homeopathy",
-    icon: "/icons/homeopathy.svg",
+    icon: "/icons/Query/homeopathic.PNG",
     specialization: "Homeopathy",
     apiValue: "homeopathy"
   }
@@ -93,44 +65,51 @@ export default function QuerySection() {
   const displayLocation = currentLocation?.city || currentLocation?.name || 'Your Area';
 
   return (
-    <section className="mt-20 bg-white">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="flex justify-between items-center mb-8">
-          <h2 className="text-xl font-bold text-gray-900">
+    <section className="w-full max-w-full">
+      {/* Section Header */}
+      <div className="px-4 mb-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-bold text-gray-900">
             Find Specialists in {displayLocation}
           </h2>
-          <button 
-            onClick={() => {
-              router.push('/specialist');
-            }}
-            className="text-[#5f4191] font-medium hover:text-[#4d3374] transition-colors"
+          <button
+            onClick={() => router.push('/specialist')}
+            className="text-sm text-purple-600 font-medium hover:text-purple-700 transition-colors"
           >
-            View All Specialists
+            All
           </button>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-4">
+      </div>
+
+      {/* Query Items Grid */}
+      <div className="px-4 w-full max-w-full">
+        {/* Responsive Grid Layout */}
+        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 gap-4 md:gap-6 lg:gap-8 xl:gap-10">
           {queryItems.map((item) => (
-            <div 
-              key={item.id} 
-              className="flex flex-col items-center group cursor-pointer"
-              onClick={() => handleSpecializationClick(item.specialization, item.apiValue)}
-            >
-              <div className="w-16 h-16 rounded-full overflow-hidden mb-3 transition-all duration-300 border-2 border-gray-200 group-hover:border-[#5f4191] group-hover:border-4 group-hover:shadow-lg relative">
-                <Image
-                  src={item.icon}
-                  alt={item.label}
-                  fill
-                  className="object-cover transition-transform duration-300 group-hover:scale-110"
-                  unoptimized
-                  onError={(e) => {
-                    console.log(`Failed to load icon: ${item.icon}`);
-                    e.target.src = '/icons/general-physician.svg'; // Fallback to SVG icon
-                  }}
-                />
-              </div>
-              <span className="text-xs font-medium text-gray-700 text-center group-hover:text-[#5f4191] transition-colors">
-                {item.label}
-              </span>
+            <div key={item.id} className="flex justify-center">
+              <button
+                onClick={() => handleSpecializationClick(item.specialization, item.apiValue)}
+                className="flex flex-col items-center focus:outline-none group"
+              >
+                <div className="bg-[#7551B2] w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 rounded-full flex items-center justify-center hover:bg-[#6441a0] transition-all duration-300 transform group-hover:scale-105 shadow-lg">
+                  <Image
+                    src={item.icon}
+                    alt={item.label}
+                    width={40}
+                    height={40}
+                    className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 object-contain"
+                    unoptimized
+                    onError={(e) => {
+                      e.target.onerror = null;
+                      e.target.style.display = 'none';
+                      e.target.parentElement.innerHTML = '<div class="text-white text-xl sm:text-2xl">🏥</div>';
+                    }}
+                  />
+                </div>
+                <span className="text-gray-700 text-xs sm:text-sm md:text-base font-medium mt-2 group-hover:text-[#7551B2] transition-colors duration-300 text-center max-w-[70px] sm:max-w-[80px] md:max-w-none">
+                  {item.label}
+                </span>
+              </button>
             </div>
           ))}
         </div>

@@ -21,10 +21,10 @@ const doctorReviews = [
   },
   {
     id: 3,
-    name: "Dr. Abhishek",
+    name: "Dr. Abhishek Sharma",
     rating: 3,
     review:
-      "Professional and caring approach. Highly recommend for anyone seeking quality healthcare services.",
+      "Great communication and thorough examination. Very satisfied with the overall experience.",
     avatar: "/icons/doctor.png",
   },
 ];
@@ -64,7 +64,7 @@ function Stars({ rating }) {
         return (
           <svg
             key={i}
-            className={`w-4 h-4 ${filled ? "text-yellow-400" : "text-gray-300"}`}
+            className={`w-3 h-3 ${filled ? "text-yellow-400" : "text-gray-300"}`}
             viewBox="0 0 20 20"
             fill="currentColor"
           >
@@ -76,63 +76,41 @@ function Stars({ rating }) {
   );
 }
 
-function ReviewCard({ review }) {
+function ReviewCard({ review, index }) {
   return (
-    <article className="bg-white border border-blue-100 rounded-2xl max-h-28 min-h-28 shadow-sm w-full md:w-[80%] lg:w-[78%] p-4 md:p-6 flex items-start">
-      <div className="flex-shrink-0 ">
-        <div className="w-14 h-14 md:w-16 md:h-16 rounded-full overflow-hidden border-2 border-white shadow-sm">
-          <img
-            src={review.avatar}
-            alt={review.name}
-            className="w-full h-full object-cover"
-            onError={(e) => {
-              e.currentTarget.src = "/icons/doctor.png";
-            }}
-          />
-        </div>
+    <div
+      className={`bg-white rounded-2xl w-full max-w-[310px] md:w-[348px] md:max-w-[348px] h-[70px] sm:h-[82px] md:h-[92px] flex flex-row gap-2 sm:gap-[12px] py-3 sm:py-[16px] px-2 sm:px-[12px] mb-2 sm:mb-3 ${index % 2 === 0 ? 'ml-0' : 'ml-auto'}`}
+    >
+      <div className="h-8 w-8 sm:h-10 sm:w-10 md:h-10 md:w-10 rounded-full overflow-hidden flex-shrink-0">
+        <img className="object-cover h-8 w-8 sm:h-10 sm:w-10 md:h-10 md:w-10" src={review.avatar} alt={review.name} />
       </div>
-
-      <div className="ml-4 flex-1">
-        <div className="flex items-start justify-between gap-4">
-          <h4 className="font-semibold text-lg text-gray-900">{review.name}</h4>
-          <div className="ml-2">
-            <Stars rating={review.rating} />
+      <div className="flex flex-col flex-1 min-w-0">
+        <div className="flex justify-between items-center">
+          <h2 className="capitalize font-medium text-xs sm:text-sm truncate">{review.name}</h2>
+          <div className="flex gap-1 flex-shrink-0">
+            <Stars rating={review.rating || 5} />
           </div>
         </div>
-
-        <p className="text-[10px] text-gray-700  leading-relaxed">
-          {review.review}
-        </p>
+        <p className="text-[7px] sm:text-[8.31px] text-gray-600 line-clamp-2 leading-tight">{review.review}</p>
       </div>
-    </article>
+    </div>
   );
 }
 
 function ReviewsPanel({ title, reviews }) {
   return (
-    <div className="bg-[#FBFAFF] rounded-2xl p-6 border border-blue-100 shadow-sm h-full flex flex-col">
-      <div className="flex items-center justify-between mb-6">
-        <h3 className="text-2xl font-bold text-purple-600">{title}</h3>
-        <button className="text-purple-600 hover:text-purple-800 font-medium">
-          View All &gt;
-        </button>
+    <div className="bg-[#F2F1F9] rounded-[20px] p-3 sm:p-4 m-2 mt-4 h-full relative">
+      <div className="flex justify-between items-center mb-3 sm:mb-4">
+        <h2 className="text-[#9B51E0] text-center font-semibold text-base sm:text-lg">{title}</h2>
+        <div className="text-sm text-[#9B51E0] font-medium cursor-pointer hover:text-[#7C3AED] transition-colors">View All &gt;</div>
       </div>
-
-      <div className="flex-1 space-y-6">
-        {reviews.map((r, idx) => (
-          <div
-            key={r.id}
-            className={`w-full flex ${
-              idx % 2 === 0 ? "justify-start" : "justify-end"
-            }`}
-          >
-            <ReviewCard review={r} />
-          </div>
-        ))}
-      </div>
-
-      <div className="mt-6 flex justify-center">
-        <button className="bg-black text-white px-6 py-3 rounded-full font-medium hover:bg-gray-800 transition-colors">
+    
+      {reviews.map((review, i) => (
+        <ReviewCard key={review.id} review={review} index={i} />
+      ))}
+    
+      <div className="flex justify-center mt-2 mb-1">
+        <button className="bg-black text-white text-xs py-2 px-4 rounded-xl hover:bg-gray-800 transition-colors">
           Post a review
         </button>
       </div>
@@ -142,13 +120,9 @@ function ReviewsPanel({ title, reviews }) {
 
 export default function ReviewsSection() {
   return (
-    <section className="py-16 mt-9">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <ReviewsPanel title="Doctor Experience" reviews={doctorReviews} />
-          <ReviewsPanel title="Patient Experience" reviews={patientReviews} />
-        </div>
-      </div>
-    </section>
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 sm:gap-4 md:gap-6 lg:gap-8 items-stretch">
+      <ReviewsPanel title="Doctor Experience" reviews={doctorReviews} />
+      <ReviewsPanel title="Patient Experience" reviews={patientReviews} />
+    </div>
   );
 }

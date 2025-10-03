@@ -154,9 +154,9 @@ export default function PatientProfilePage() {
         {/* Header */}
         <div className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div className="flex items-center justify-between h-16">
-              <div className="flex items-center">
-                <div className="mr-4">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between py-4 sm:py-0 sm:h-16">
+              <div className="flex items-center mb-4 sm:mb-0">
+                <div className="mr-3 sm:mr-4">
                   <ImageUpload
                     currentImage={editData.avatar}
                     onImageChange={handleImageChange}
@@ -170,25 +170,25 @@ export default function PatientProfilePage() {
                   />
                 </div>
                 <div>
-                  <h1 className="text-2xl font-semibold text-gray-900">
+                  <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">
                     {user?.firstName} {user?.lastName}
                   </h1>
-                  <p className="text-sm text-gray-600">Patient Profile</p>
+                  <p className="text-xs sm:text-sm text-gray-600">Patient Profile</p>
                 </div>
               </div>
-              <div className="flex items-center space-x-3">
+              <div className="flex items-center space-x-2 sm:space-x-3">
                 {isEditing ? (
                   <>
                     <button
                       onClick={handleCancel}
-                      className="px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors"
+                      className="px-3 sm:px-4 py-2 text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
                     >
                       Cancel
                     </button>
                     <button
                       onClick={handleSave}
                       disabled={isLoading}
-                      className="px-4 py-2 bg-[#5f4191] text-white rounded-lg hover:bg-[#4d3374] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                      className="px-3 sm:px-4 py-2 bg-[#5f4191] text-white rounded-lg hover:bg-[#4d3374] disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm"
                     >
                       {isLoading ? 'Saving...' : 'Save Changes'}
                     </button>
@@ -196,7 +196,7 @@ export default function PatientProfilePage() {
                 ) : (
                   <button
                     onClick={() => setIsEditing(true)}
-                    className="px-4 py-2 bg-[#5f4191] text-white rounded-lg hover:bg-[#4d3374] transition-colors"
+                    className="px-3 sm:px-4 py-2 bg-[#5f4191] text-white rounded-lg hover:bg-[#4d3374] transition-colors text-sm"
                   >
                     Edit Profile
                   </button>
@@ -206,99 +206,99 @@ export default function PatientProfilePage() {
           </div>
         </div>
 
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-8">
           {/* Success/Error Messages */}
           {success && (
-            <div className="mb-6 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <p className="text-green-600 text-sm">{success}</p>
+            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-green-50 border border-green-200 rounded-lg">
+              <p className="text-green-600 text-xs sm:text-sm">{success}</p>
             </div>
           )}
           
           {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm">{error}</p>
+            <div className="mb-4 sm:mb-6 p-3 sm:p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-xs sm:text-sm">{error}</p>
             </div>
           )}
 
           {/* Personal Information */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Personal Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Personal Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">First Name</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">First Name</label>
                 {isEditing ? (
                   <input
                     type="text"
                     name="firstName"
                     value={editData.firstName}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{profile?.firstName || user?.firstName || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2 text-sm">{profile?.firstName || user?.firstName || 'Not provided'}</p>
                 )}
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Last Name</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Last Name</label>
                 {isEditing ? (
                   <input
                     type="text"
                     name="lastName"
                     value={editData.lastName}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{profile?.lastName || user?.lastName || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2 text-sm">{profile?.lastName || user?.lastName || 'Not provided'}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Email</label>
-                <p className="text-gray-900 py-2">{user?.email || 'Not provided'}</p>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Email</label>
+                <p className="text-gray-900 py-2 text-sm">{user?.email || 'Not provided'}</p>
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Phone</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Phone</label>
                 {isEditing ? (
                   <input
                     type="tel"
                     name="phone"
                     value={editData.phone}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{profile?.phone || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2 text-sm">{profile?.phone || 'Not provided'}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Date of Birth</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Date of Birth</label>
                 {isEditing ? (
                   <input
                     type="date"
                     name="dateOfBirth"
                     value={editData.dateOfBirth}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">
+                  <p className="text-gray-900 py-2 text-sm">
                     {profile?.dateOfBirth ? new Date(profile.dateOfBirth).toLocaleDateString() : 'Not provided'}
                   </p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Gender</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Gender</label>
                 {isEditing ? (
                   <select
                     name="gender"
                     value={editData.gender}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   >
                     <option value="">Select Gender</option>
                     <option value="male">Male</option>
@@ -307,33 +307,33 @@ export default function PatientProfilePage() {
                     <option value="prefer-not-to-say">Prefer not to say</option>
                   </select>
                 ) : (
-                  <p className="text-gray-900 py-2 capitalize">{profile?.gender || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2 text-sm capitalize">{profile?.gender || 'Not provided'}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Location</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Location</label>
                 {isEditing ? (
                   <input
                     type="text"
                     name="location"
                     value={editData.location}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{profile?.location || currentLocation?.city || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2 text-sm">{profile?.location || currentLocation?.city || 'Not provided'}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Language</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Language</label>
                 {isEditing ? (
                   <select
                     name="language"
                     value={editData.language}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   >
                     <option value="English">English</option>
                     <option value="Hindi">Hindi</option>
@@ -344,60 +344,60 @@ export default function PatientProfilePage() {
                     <option value="Marathi">Marathi</option>
                   </select>
                 ) : (
-                  <p className="text-gray-900 py-2">{profile?.language || 'English'}</p>
+                  <p className="text-gray-900 py-2 text-sm">{profile?.language || 'English'}</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Contact Information */}
-          <div className="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Contact Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-4 sm:mb-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Contact Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Emergency Contact</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Emergency Contact</label>
                 {isEditing ? (
                   <input
                     type="tel"
                     name="emergencyContact"
                     value={editData.emergencyContact}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{profile?.emergencyContact || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2 text-sm">{profile?.emergencyContact || 'Not provided'}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Address</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Address</label>
                 {isEditing ? (
                   <textarea
                     name="address"
                     value={editData.address}
                     onChange={handleInputChange}
                     rows={3}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{profile?.address || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2 text-sm">{profile?.address || 'Not provided'}</p>
                 )}
               </div>
             </div>
           </div>
 
           {/* Medical Information */}
-          <div className="bg-white rounded-lg shadow-sm p-6">
-            <h2 className="text-xl font-semibold text-gray-900 mb-6">Medical Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6">
+            <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-4 sm:mb-6">Medical Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Blood Group</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Blood Group</label>
                 {isEditing ? (
                   <select
                     name="bloodGroup"
                     value={editData.bloodGroup}
                     onChange={handleInputChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   >
                     <option value="">Select Blood Group</option>
                     <option value="A+">A+</option>
@@ -410,12 +410,12 @@ export default function PatientProfilePage() {
                     <option value="O-">O-</option>
                   </select>
                 ) : (
-                  <p className="text-gray-900 py-2">{profile?.bloodGroup || 'Not provided'}</p>
+                  <p className="text-gray-900 py-2 text-sm">{profile?.bloodGroup || 'Not provided'}</p>
                 )}
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Allergies</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Allergies</label>
                 {isEditing ? (
                   <input
                     type="text"
@@ -423,15 +423,15 @@ export default function PatientProfilePage() {
                     value={editData.allergies}
                     onChange={handleInputChange}
                     placeholder="List any allergies"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{profile?.allergies || 'None reported'}</p>
+                  <p className="text-gray-900 py-2 text-sm">{profile?.allergies || 'None reported'}</p>
                 )}
               </div>
 
               <div className="md:col-span-2">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Medical History</label>
+                <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Medical History</label>
                 {isEditing ? (
                   <textarea
                     name="medicalHistory"
@@ -439,10 +439,10 @@ export default function PatientProfilePage() {
                     onChange={handleInputChange}
                     rows={4}
                     placeholder="Describe any medical conditions or history"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191]"
+                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#5f4191] text-sm"
                   />
                 ) : (
-                  <p className="text-gray-900 py-2">{profile?.medicalHistory || 'No medical history recorded'}</p>
+                  <p className="text-gray-900 py-2 text-sm">{profile?.medicalHistory || 'No medical history recorded'}</p>
                 )}
               </div>
             </div>

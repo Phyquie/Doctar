@@ -206,9 +206,9 @@ export default function TrendingReelsSection() {
   }
 
   return (
-    <div className="mt-6">
-      <div className="flex justify-between items-center mt-[46px] ml-[30px] mr-[30px]">
-        <h2 className="text-black text-2xl font-bold">{getSectionTitle()}</h2>
+    <div className="mt-6 px-4 sm:px-6">
+      <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-8 sm:mt-[46px] mb-4 sm:mb-6">
+        <h2 className="text-black text-xl sm:text-2xl font-bold mb-2 sm:mb-0">{getSectionTitle()}</h2>
         <Link 
           href="/reels" 
           className="text-purple-600 hover:text-purple-700 font-medium text-sm"
@@ -216,16 +216,16 @@ export default function TrendingReelsSection() {
           View All →
         </Link>
       </div>
-      <div className="flex p-6 overflow-auto scrollbar-hide scroll-smooth gap-4">
+      <div className="flex p-2 sm:p-6 overflow-auto scrollbar-hide scroll-smooth gap-3 sm:gap-4">
         {reels && reels.map((reel) => (
           <div 
             key={reel._id} 
-            className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow w-[300px] h-[500px] hover:shadow-lg transition-shadow duration-300"
+            className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow w-[280px] sm:w-[300px] h-[480px] sm:h-[500px] hover:shadow-lg transition-shadow duration-300 flex-shrink-0"
           >
             <div className="relative flex-shrink-0">
               {playingReel === reel._id ? (
                 // Video Player when playing - Reel aspect ratio (9:16)
-                <div className="relative w-full h-96 rounded-t-4xl overflow-hidden bg-black">
+                <div className="relative w-full h-80 sm:h-96 rounded-t-4xl overflow-hidden bg-black">
                   {(reel.iframeLink || reel.iframeUrl) && isYouTubeUrl(reel.iframeLink || reel.iframeUrl) ? (
                     // YouTube iframe with reel aspect ratio
                     <iframe
@@ -274,18 +274,18 @@ export default function TrendingReelsSection() {
               ) : (
                 // Thumbnail when not playing - Reel aspect ratio (9:16)
                 <div 
-                  className="relative w-full h-96 cursor-pointer group"
+                  className="relative w-full h-80 sm:h-96 cursor-pointer group"
                   onClick={() => handleVideoClick(reel._id)}
                 >
                   {reel.thumbnail ? (
                     <img 
                       src={reel.thumbnail} 
                       alt={reel.title}
-                      className="w-full h-96 object-cover rounded-t-4xl group-hover:opacity-90 transition-opacity"
+                      className="w-full h-80 sm:h-96 object-cover rounded-t-4xl group-hover:opacity-90 transition-opacity"
                     />
                   ) : (
-                    <div className="w-full h-96 bg-gradient-to-br from-purple-400 to-purple-600 rounded-t-4xl flex items-center justify-center">
-                      <FaPlay className="text-white text-4xl" />
+                    <div className="w-full h-80 sm:h-96 bg-gradient-to-br from-purple-400 to-purple-600 rounded-t-4xl flex items-center justify-center">
+                      <FaPlay className="text-white text-3xl sm:text-4xl" />
                     </div>
                   )}
                   {/* Play button overlay */}
@@ -325,8 +325,8 @@ export default function TrendingReelsSection() {
                 </div>
               )}
             </div>
-            <div className="flex-col flex-1 p-4 overflow-hidden">
-              <h3 className="text-xl text-black font-bold line-clamp-2 mb-2 break-words">
+            <div className="flex-col flex-1 p-3 sm:p-4 overflow-hidden">
+              <h3 className="text-lg sm:text-xl text-black font-bold line-clamp-2 mb-2 break-words">
                 {reel.title}
               </h3>
               <div className="flex items-center justify-between mb-2 text-xs">

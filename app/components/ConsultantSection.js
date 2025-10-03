@@ -23,38 +23,47 @@ const features = [
 
 export default function ConsultantSection() {
   return (
-    <section className="py-5 bg-[#5f4191] rounded-lg text-white">
-      <div className="max-w-7xl mx-auto px-6">
-        <div className="text-center mb-5">
-          <h2 className="text-3xl font-bold ">Consultant</h2>
-        </div>
-        
-        <div className="bg-[#5f4191] border-2 border-white rounded-3xl p-8 mb-8 relative">
-          <h3 className="text-2xl font-semibold text-center mb-8">
-            Why <span className="text-blue-300">DOCTAR</span> For Doctors
-          </h3>
-          
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <div>
+      <h3 className="text-center md:hidden text-black font-bold text-xl mb-4">
+        Consultant
+      </h3>
+      <div className="bg-[#5f4191] w-full p-1 md:p-4">
+        <h2 className="text-center text-white text-2xl mb-2 md:mb-4">
+          Consultant
+        </h2>
+
+        <div className="flex flex-col items-center justify-center p-1 md:p-4 border-1 border-white rounded-3xl mb-2">
+          <h2 className="text-center text-white font text-lg sm:text-xl mb-4">
+            Why <span className="font-extrabold text-[#4D9FF1]">DOCTAR</span>{" "}
+            for Doctors
+          </h2>
+
+          <div className="flex w-full mb-6">
             {features.map((feature) => (
-              <div key={feature.id} className="flex items-start space-x-4">
-                <div className="flex-shrink-0">
-                  <span className="text-6xl font-bold text-white">{feature.number}</span>
+              <div key={feature.id} className="flex-1 flex md:gap-2 items-start">
+                <div className="font-bold text-6xl md:text-8xl text-white leading-none">
+                  {feature.number}
                 </div>
                 <div className="flex-1">
-                  <h4 className="text-lg font-bold mb-2 text-white">{feature.title}</h4>
-                  <p className="text-sm text-white opacity-90 leading-relaxed">{feature.description}</p>
+                  <p className="text-[9px] md:text-xl font-bold text-white leading-tight">
+                    {feature.title}
+                  </p>
+                  <p className="text-[9px] md:text-lg text-white mt-1 leading-tight">
+                    {feature.description}
+                  </p>
                 </div>
               </div>
             ))}
           </div>
         </div>
-        
-        <div className="text-right">
-          <button className="bg-[#3a2557] text-white px-8 py-3 rounded-2xl font-semibold hover:bg-[#27173a] transition-colors shadow-lg">
+
+        {/* Apply Now Button */}
+        <div className="flex justify-end mb-1">
+          <button className="bg-[#5154B5] text-white px-6 border py-2 sm:px-8 sm:py-3 rounded-2xl font-semibold hover:opacity-90 transition-colors text-sm sm:text-base">
             Apply Now
           </button>
         </div>
       </div>
-    </section>
+    </div>
   );
 }

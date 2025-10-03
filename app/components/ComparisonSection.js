@@ -1,52 +1,52 @@
 export default function ComparisonSection() {
   return (
-    <div className="p-2">
-      <h2 className="text-center text-black font-bold text-xl mt-2 mb-2">why choose DOCTAR ?</h2>
+    <div className="p-2 sm:p-4">
+      <h2 className="text-center text-black font-bold text-lg sm:text-xl mt-2 mb-4 sm:mb-6">why choose DOCTAR ?</h2>
       
       {/* Mobile Layout - 2 divs per row */}
-      <div className="md:hidden flex text-[10px] gap-2.5 rounded-xl mb-2">
-        <div className="flex-col w-[200px] flex shadow-lg rounded-xl overflow-hidden bg-white h-[280px] flex-1">
-          <div className="flex justify-center h-[40px]">
+      <div className="md:hidden flex text-[10px] gap-2 sm:gap-3 rounded-xl mb-2">
+        <div className="flex-col w-[180px] sm:w-[200px] flex shadow-lg rounded-xl overflow-hidden bg-white h-[260px] sm:h-[280px] flex-1">
+          <div className="flex justify-center h-[40px] items-center">
             <img
-              className="w-[96px] h-[31px]"
+              className="w-[80px] sm:w-[96px] h-[25px] sm:h-[31px]"
               src="/icons/logo.png"
               alt="no image"
             />
           </div>
-          <div className="flex items-center h-[48px] p-2.5 text-white bg-[#7551B3]">
-            <p className="text-[10px]">Thousands of doctors near you - find the right specialist easily</p>
+          <div className="flex items-center h-[48px] p-2 sm:p-2.5 text-white bg-[#7551B3]">
+            <p className="text-[9px] sm:text-[10px] leading-tight">Thousands of doctors near you - find the right specialist easily</p>
           </div>
-          <div className="flex items-center h-[48px] p-2.5 text-black">
-            <p className="text-[10px]">Transparent consultation fees - no hidden charges</p>
+          <div className="flex items-center h-[48px] p-2 sm:p-2.5 text-black">
+            <p className="text-[9px] sm:text-[10px] leading-tight">Transparent consultation fees - no hidden charges</p>
           </div>
-          <div className="flex items-center h-[48px] p-2.5 text-white bg-[#7551B3]">
-            <p className="text-[10px]">Complete doctor profiles - experience, specialization, reviews</p>
+          <div className="flex items-center h-[48px] p-2 sm:p-2.5 text-white bg-[#7551B3]">
+            <p className="text-[9px] sm:text-[10px] leading-tight">Complete doctor profiles - experience, specialization, reviews</p>
           </div>
-          <div className="flex items-center h-[48px] p-2.5 text-black">
-            <p className="text-[10px]">Lowest booking & consultation fees*</p>
+          <div className="flex items-center h-[48px] p-2 sm:p-2.5 text-black">
+            <p className="text-[9px] sm:text-[10px] leading-tight">Lowest booking & consultation fees*</p>
           </div>
-          <div className="flex items-center h-[48px] p-2.5 text-white bg-[#7551B3]">
-            <p className="text-[10px]">Instant appointment booking - connect with doctors in one click</p>
+          <div className="flex items-center h-[48px] p-2 sm:p-2.5 text-white bg-[#7551B3]">
+            <p className="text-[9px] sm:text-[10px] leading-tight">Instant appointment booking - connect with doctors in one click</p>
           </div>
         </div>
-        <div className="flex-col w-[200px] shadow-lg rounded-xl overflow-hidden bg-white h-[280px] flex flex-1">
-          <div className="flex justify-center h-[40px]">
-            <p className="text-[20px]">Others</p>
+        <div className="flex-col w-[180px] sm:w-[200px] shadow-lg rounded-xl overflow-hidden bg-white h-[260px] sm:h-[280px] flex flex-1">
+          <div className="flex justify-center h-[40px] items-center">
+            <p className="text-[16px] sm:text-[20px] font-bold">Others</p>
           </div>
-          <div className="flex items-center h-[48px] p-2.5 text-white bg-[#7881A3]">
-            <p className="text-[10px]">Limited doctors and specialists available</p>
+          <div className="flex items-center h-[48px] p-2 sm:p-2.5 text-white bg-[#7881A3]">
+            <p className="text-[9px] sm:text-[10px] leading-tight">Limited doctors and specialists available</p>
           </div>
-          <div className="flex items-center h-[48px] p-2.5 text-black">
-            <p className="text-[10px]">Higher and unclear charges</p>
+          <div className="flex items-center h-[48px] p-2 sm:p-2.5 text-black">
+            <p className="text-[9px] sm:text-[10px] leading-tight">Higher and unclear charges</p>
           </div>
-          <div className="flex items-center h-[48px] p-2.5 text-white bg-[#7881A3]">
-            <p className="text-[10px]">Minimal information provided</p>
+          <div className="flex items-center h-[48px] p-2 sm:p-2.5 text-white bg-[#7881A3]">
+            <p className="text-[9px] sm:text-[10px] leading-tight">Minimal information provided</p>
           </div>
-          <div className="flex items-center h-[48px] p-2.5 text-black">
-            <p className="text-[10px]">High booking and consultation charges*</p>
+          <div className="flex items-center h-[48px] p-2 sm:p-2.5 text-black">
+            <p className="text-[9px] sm:text-[10px] leading-tight">High booking and consultation charges*</p>
           </div>
-          <div className="flex items-center h-[48px] p-2.5 text-white bg-[#7881A3]">
-            <p className="text-[10px]">Difficult and time-consuming to book appointments</p>
+          <div className="flex items-center h-[48px] p-2 sm:p-2.5 text-white bg-[#7881A3]">
+            <p className="text-[9px] sm:text-[10px] leading-tight">Difficult and time-consuming to book appointments</p>
           </div>
         </div>
       </div>
@@ -66,7 +66,7 @@ export default function ComparisonSection() {
 
         {/* Second div with Doctar logo */}
         <div className="flex-1 flex-col shadow-lg rounded-xl overflow-hidden bg-white h-[280px] flex">
-          <div className="flex justify-center h-[40px]">
+          <div className="flex justify-center h-[40px] items-center">
             <img
               className="w-[96px] h-[31px]"
               src="/icons/logo.png"
@@ -92,8 +92,8 @@ export default function ComparisonSection() {
 
         {/* Third div */}
         <div className="flex-1 flex-col shadow-lg rounded-xl overflow-hidden bg-white h-[280px] flex">
-          <div className="flex justify-center h-[40px]">
-            <p className="text-[20px]">Others</p>
+          <div className="flex justify-center h-[40px] items-center">
+            <p className="text-[20px] font-bold">Others</p>
           </div>
           <div className="flex items-center h-[48px] p-2.5 text-white bg-[#7881A3]">
             <p className="text-sm">Limited doctors and specialists available</p>

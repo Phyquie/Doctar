@@ -104,6 +104,8 @@ export default function LocationPicker({ onLocationSelect, currentLocation: prop
     setLocalSelectedLocation(location);
     // Update global location immediately
     dispatch(setLocation(location));
+    // Close the picker after selection
+    dispatch(setLocationPickerOpen(false));
   };
 
   const handleConfirmLocation = () => {
@@ -154,6 +156,8 @@ export default function LocationPicker({ onLocationSelect, currentLocation: prop
       setLocalSelectedLocation(locationObject);
       // Also update global location immediately for auto-detection
       dispatch(setLocation(locationObject));
+      // Close the picker after getting current location
+      dispatch(setLocationPickerOpen(false));
     } catch (error) {
       console.error('Error getting location:', error);
       let errorMessage = 'Unable to get your current location.';
@@ -191,7 +195,7 @@ export default function LocationPicker({ onLocationSelect, currentLocation: prop
 
   return (
     <div 
-      className="fixed inset-0  bg-opacity-30 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
+      className="fixed inset-0 bg-black bg-opacity-30 backdrop-blur-sm z-50 flex items-center justify-center p-2 sm:p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
           dispatch(setLocationPickerOpen(false));
@@ -238,10 +242,16 @@ export default function LocationPicker({ onLocationSelect, currentLocation: prop
                 disabled={isGettingLocation}
                 className="w-full flex items-center justify-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed shadow-md hover:shadow-lg"
               >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+                <img 
+                  src="/icons/location.png"
+                  alt="Location"
+                  className="w-4 h-4"
+                  onError={(e) => {
+                    e.target.onerror = null;
+                    e.target.style.display = 'none';
+                    e.target.parentElement.innerHTML = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>';
+                  }}
+                />
                 <span className="text-sm font-medium">
                   {isGettingLocation ? 'Getting location...' : 'Use Current Location'}
                 </span>
@@ -275,10 +285,16 @@ export default function LocationPicker({ onLocationSelect, currentLocation: prop
                       }`}
                     >
                       <div className="flex items-start space-x-2">
-                        <svg className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                        </svg>
+                        <img 
+                          src="/icons/location.png"
+                          alt="Location"
+                          className="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0"
+                          onError={(e) => {
+                            e.target.onerror = null;
+                            e.target.style.display = 'none';
+                            e.target.parentElement.innerHTML = '<svg class="w-4 h-4 text-gray-400 mt-0.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>';
+                          }}
+                        />
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-medium truncate">{result.name}</p>
                           {result.address && (
@@ -309,10 +325,16 @@ export default function LocationPicker({ onLocationSelect, currentLocation: prop
                   }`}
                 >
                   <div className="flex items-center space-x-2">
-                    <svg className="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
+                    <img 
+                      src="/icons/location.png"
+                      alt="Location"
+                      className="w-4 h-4 text-gray-400"
+                      onError={(e) => {
+                        e.target.onerror = null;
+                        e.target.style.display = 'none';
+                        e.target.parentElement.innerHTML = '<svg class="w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>';
+                      }}
+                    />
                     <span className="text-sm">{city.name}</span>
                     {selectedLocation?.name === city.name && (
                       <svg className="w-4 h-4 text-purple-600 ml-auto" fill="currentColor" viewBox="0 0 20 20">

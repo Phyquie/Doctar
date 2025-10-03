@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import LocationPicker from './LocationPicker';
+import SearchBar from './SearchBar';
 import { useAppDispatch, useAppSelector } from '../store/hooks';
 import { 
   selectCurrentLocation, 
@@ -51,7 +52,7 @@ export default function Header() {
 
   // Format location name for header display
   const formatLocationForHeader = (location) => {
-    if (!location) return 'Select Location';
+    if (!location) return 'Bengaluru';
     
     // For current location, show a shortened version
     if (location.isCurrentLocation) {
@@ -64,192 +65,262 @@ export default function Header() {
     }
     
     // Truncate long names
-    const name = location.name || 'Unknown Location';
+    const name = location.name || 'Bengaluru';
     return name.length > 20 ? name.substring(0, 17) + '...' : name;
   };
 
   return (
-        <header className="sticky top-0 z-50 bg-[#5f4191] text-white py-2 sm:py-4 px-4 lg:px-35">
-      <div className="max-w-7xl mx-auto flex items-center justify-between gap-2 sm:gap-4">
-        {/* Logo and Location */}
-        <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-          <div className="flex items-center space-x-2">
+    <div className="sticky top-0 z-[100] shadow-2xl">
+      {/* Main Header */}
+      <div className="flex items-center justify-between p-2 px-4 md:p-4 md:px-10 bg-[#5f4191]">
+        
+        {/* LEFT CLUSTER: On desktop, show logo then location; on mobile, only location */}
+        <div className="flex items-center gap-3">
+          {/* Desktop logo at far-left */}
+          <div className="hidden md:block">
             <Link href="/" className="hover:opacity-80 transition-opacity">
               <Image
                 src="/icons/logo.png"
                 alt="Doctar Logo"
                 width={128}
                 height={40}
-                className="object-contain w-20 h-6 sm:w-32 sm:h-10 cursor-pointer"
+                className="w-32 h-auto cursor-pointer"
                 unoptimized
               />
             </Link>
           </div>
-          
-          {/* Location Picker */}
+
+          {/* Location selector (mobile and desktop) */}
           <div className="relative location-picker">
             <button
               onClick={() => dispatch(setLocationPickerOpen(!isLocationPickerOpen))}
-              className="flex items-center space-x-1 sm:space-x-2   px-2 sm:px-3 py-1 sm:py-2 rounded-lg hover:bg-opacity-30 transition-colors group"
+              className="flex w-[120px] md:w-[140px] items-center gap-2 bg-white/10 hover:bg-white/20 text-white font-medium px-3 py-1 rounded-md transition"
               title={currentLocation.address || currentLocation.name || 'Click to change location'}
             >
-              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-              </svg>
-              <div className="flex flex-col items-start min-w-0 max-w-20 sm:max-w-none">
-                <span className="text-xs sm:text-sm font-medium truncate">
-                  {formatLocationForHeader(currentLocation)}
-                </span>
-              </div>
-              <svg className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0 transition-transform group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+              <img
+                src="/icons/location.png"
+                alt="Location"
+                className="flex-shrink-0 w-4 h-4"
+                onError={(e) => {
+                  e.target.onerror = null;
+                  e.target.style.display = 'none';
+                  e.target.parentElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="flex-shrink-0 w-4 h-4"><path fill-rule="evenodd" d="M11.54 22.35a.75.75 0 0 0 .92 0c1.14-.87 2.67-2.2 4.04-3.78C18.92 16.82 21 14.2 21 11.25 21 6.7 17.52 3 12.75 3S4.5 6.7 4.5 11.25c0 2.95 2.08 5.57 4.5 7.32 1.37 1.58 2.9 2.9 4.04 3.78Zm1.21-9.6a3 3 0 1 0-4.5-3.9 3 3 0 0 0 4.5 3.9Z" clip-rule="evenodd"></path></svg>';
+                }}
+              />
+              <span className="overflow-hidden whitespace-nowrap truncate">
+                {formatLocationForHeader(currentLocation) || 'Bengaluru'}
+              </span>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className={`flex-shrink-0 w-4 h-4 transition-transform ${
+                  isLocationPickerOpen ? "rotate-180" : ""
+                }`}
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M12 14.25a.75.75 0 0 1-.53-.22l-4.5-4.5a.75.75 0 0 1 1.06-1.06L12 12.44l3.97-3.97a.75.75 0 0 1 1.06 1.06l-4.5 4.5a.75.75 0 0 1-.53.22Z"
+                  clipRule="evenodd"
+                />
               </svg>
             </button>
-
           </div>
         </div>
 
-        {/* Search Bar */}
-        <div className="flex-1 max-w-md mx-2 sm:mx-4 lg:mx-8">
-          <form 
-            onSubmit={(e) => {
-              e.preventDefault();
-              const searchTerm = e.target.search.value;
-              if (searchTerm.trim()) {
-                window.location.href = `/doctors?search=${encodeURIComponent(searchTerm.trim())}`;
-              } else {
-                window.location.href = '/doctors';
-              }
-            }}
-            className="relative"
-          >
-            <input
-              name="search"
-              type="text"
-              placeholder="Search doctors..."
-              className="w-full px-3 sm:px-4 py-1.5 sm:py-2 rounded-full bg-white text-gray-800 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-purple-500 text-sm sm:text-base"
-            />
-            <button 
-              type="submit"
-              className="absolute right-2 top-1/2 transform -translate-y-1/2 bg-[#5f4191] text-white px-2 sm:px-4 py-0.5 sm:py-1 rounded-full text-xs sm:text-sm hover:bg-[#4d3374] transition-colors"
-            >
-              Search
-            </button>
-          </form>
+        {/* CENTER: Search bar for desktop only */}
+        <div className="hidden md:flex absolute left-1/2 -translate-x-1/2 w-full max-w-md">
+          <SearchBar placeholder="Search doctors, specialties, locations..." />
         </div>
 
-        {/* User Profile and Menu */}
-        <div className="flex items-center space-x-2 sm:space-x-4 flex-shrink-0">
-          {/* Find Doctors Link */}
-          
-          
+        {/* Mobile: centered logo */}
+        <div className="absolute left-1/2 -translate-x-1/2 md:hidden">
+          <Link href="/" className="hover:opacity-80 transition-opacity">
+            <Image
+              src="/icons/logo.png"
+              alt="Doctar Logo"
+              width={96}
+              height={30}
+              className="w-24 h-auto cursor-pointer"
+              unoptimized
+            />
+          </Link>
+        </div>
+
+        {/* RIGHT: Profile / Auth */}
+        <div className="flex items-center space-x-3">
           {isAuthenticated ? (
-            <>
-              <span className="text-xs sm:text-sm hidden sm:block">
-                Hi {user?.firstName || 'User'}
-              </span>
-              <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-full overflow-hidden border-2 border-[#5f4191] flex-shrink-0">
+            <div className="flex items-center space-x-2">
+              {/* Desktop: Show greeting */}
+              <div className="hidden md:flex items-center space-x-1">
+                <span className="text-white font-medium">Hi,</span>
+                <span className="text-white font-medium">{user?.firstName || 'User'}</span>
+              </div>
+              <button
+                onClick={() => {
+                  const profileUrl = role === 'doctor' ? '/doctor-profile' : 
+                                   role === 'patient' ? '/patient-profile' : 
+                                   role === 'admin' ? '/admin/dashboard' : '/';
+                  window.location.href = profileUrl;
+                }}
+                title={user?.firstName || "Profile"}
+                className="w-8 h-8 md:w-10 md:h-10 rounded-full overflow-hidden bg-white text-[#5f4191] flex items-center justify-center font-semibold"
+              >
                 {profile?.avatar || user?.avatar ? (
                   <Image
                     src={profile?.avatar || user?.avatar || '/icons/user-placeholder.png'}
                     alt="Profile Picture"
-                    width={32}
-                    height={32}
+                    width={40}
+                    height={40}
                     className="w-full h-full object-cover"
                     unoptimized
                   />
                 ) : (
-                  <div className="w-full h-full bg-[#5f4191] flex items-center justify-center">
-                    <span className="text-white text-xs sm:text-sm font-semibold">
-                      {user?.firstName?.charAt(0) || 'U'}
-                    </span>
-                  </div>
+                  (user?.firstName || "U").charAt(0).toUpperCase()
                 )}
-              </div>
-              <div className="relative" ref={menuRef}>
-                <button
-                  onClick={() => setIsMenuOpen(!isMenuOpen)}
-                  className="p-1 sm:p-2 hover:bg-[#7959ad] rounded"
+              </button>
+            </div>
+          ) : (
+            <>
+              {/* Desktop Auth Buttons */}
+              <div className="hidden md:flex items-center space-x-2">
+                <a
+                  href="/auth/login"
+                  className="bg-white/10 hover:bg-white/20 text-white px-4 py-2 rounded-md transition-colors"
                 >
-                  <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                  </svg>
-                </button>
-                
-                {/* Dropdown Menu */}
-                {isMenuOpen && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 z-50">
-                    <div className="py-1">
-                      <div className="px-4 py-2 border-b border-gray-200">
-                        <p className="text-sm font-medium text-gray-900">
-                          {user?.firstName} {user?.lastName}
-                        </p>
-                        <p className="text-xs text-gray-500 capitalize">{role}</p>
+                  Login
+                </a>
+                <a
+                  href="/auth"
+                  className="bg-white hover:bg-white/90 text-[#5f4191] px-4 py-2 rounded-md font-medium transition-colors"
+                >
+                  Sign Up
+                </a>
+              </div>
+            </>
+          )}
+
+          {/* Mobile menu button */}
+          <div className="md:hidden relative" ref={menuRef}>
+            <button 
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+              className="ml-2 p-2 text-white hover:bg-white/10 rounded-md transition-colors"
+            >
+              <svg width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M4 18h16v-2H4v2zm0-5h16v-2H4v2zm0-7v2h16V6H4z"/>
+              </svg>
+            </button>
+
+            {/* Mobile Menu Dropdown */}
+            <div className={`absolute right-0 top-full mt-2 w-72 bg-white shadow-2xl rounded-xl z-[9999] overflow-hidden transform transition-all duration-300 ease-out ${
+              isMenuOpen 
+                ? 'opacity-100 scale-100 translate-y-0' 
+                : 'opacity-0 scale-95 -translate-y-2 pointer-events-none'
+            }`}>
+              {isAuthenticated ? (
+                <>
+                  {/* User Info Section */}
+                  <div className="bg-gradient-to-r from-[#5f4191] to-[#4d3374] text-white p-4">
+                    <div className="flex items-center gap-3">
+                      <div className="w-12 h-12 rounded-full overflow-hidden bg-white/20 text-white flex items-center justify-center font-semibold text-lg">
+                        {profile?.avatar || user?.avatar ? (
+                          <Image
+                            src={profile?.avatar || user?.avatar || '/icons/user-placeholder.png'}
+                            alt="Profile Picture"
+                            width={48}
+                            height={48}
+                            className="w-full h-full object-cover"
+                            unoptimized
+                          />
+                        ) : (
+                          (user?.firstName || "U").charAt(0).toUpperCase()
+                        )}
                       </div>
-                      
-                      {role === 'patient' ? (
-                        <a
-                          href="/patient-profile"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          Profile
-                        </a>
-                      ) : role === 'doctor' ? (
-                        <a
-                          href="/doctor-profile"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          Profile
-                        </a>
-                      ) : role === 'admin' ? (
-                        <a
-                          href="/admin/dashboard"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        >
-                          Dashboard
-                        </a>
-                      ) : null}
-                      
-                    
-                
-                      <div className="border-t border-gray-200">
-                        <button
-                          onClick={() => {
-                            dispatch(logout());
-                            setIsMenuOpen(false);
-                          }}
-                          className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50"
-                        >
-                          Sign Out
-                        </button>
+                      <div>
+                        <p className="font-medium">Hi, {user?.firstName || 'User'}!</p>
+                        <p className="text-sm text-white/80 capitalize">{role || 'User'}</p>
                       </div>
                     </div>
                   </div>
-                )}
-              </div>
-            </>
-          ) : (
-            <div className="flex items-center space-x-2">
-              <a
-                href="/auth/login"
-                className="text-xs sm:text-sm text-white hover:text-gray-200 transition-colors"
-              >
-                Sign In
-              </a>
-              <a
-                href="/auth"
-                className="px-3 py-1 sm:px-4 sm:py-2 bg-white text-[#5f4191] rounded-lg text-xs sm:text-sm font-semibold hover:bg-gray-100 transition-colors"
-              >
-                Sign Up
-              </a>
+
+                  {/* Menu Items */}
+                  <div className="p-2 space-y-1">
+                    <button
+                      onClick={() => {
+                        const profileUrl = role === 'doctor' ? '/doctor-profile' : 
+                                         role === 'patient' ? '/patient-profile' : 
+                                         role === 'admin' ? '/admin/dashboard' : '/';
+                        window.location.href = profileUrl;
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full text-left p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-3"
+                    >
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                      My Profile
+                    </button>
+
+                    <button
+                      onClick={() => {
+                        dispatch(logout());
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full text-left p-3 text-red-600 hover:bg-red-50 rounded-lg transition-all duration-200 flex items-center gap-3"
+                    >
+                      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                      </svg>
+                      Logout
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* Welcome Header */}
+                  <div className="bg-gradient-to-r from-[#5f4191] to-[#4d3374] text-white p-4 text-center">
+                    <h3 className="font-semibold text-lg">Welcome to Doctar</h3>
+                    <p className="text-sm text-white/80">Join our healthcare community</p>
+                  </div>
+
+                  {/* Auth Buttons */}
+                  <div className="p-4 space-y-3">
+                    <a
+                      href="/auth/login"
+                      className="w-full p-3 bg-white border-2 border-[#5f4191] text-[#5f4191] rounded-lg font-medium hover:bg-[#5f4191] hover:text-white transition-all duration-200 flex items-center justify-center gap-2"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M11 7L9.6 8.4l2.6 2.6H2v2h10.2l-2.6 2.6L11 17l5-5-5-5zm9 12h-8v2h8c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-8v2h8v12z"/>
+                      </svg>
+                      Login
+                    </a>
+                    
+                    <a
+                      href="/auth"
+                      className="w-full p-3 bg-[#5f4191] text-white rounded-lg font-medium hover:bg-[#4d3374] transition-all duration-200 flex items-center justify-center gap-2 hover:shadow-lg transform hover:scale-105"
+                      onClick={() => setIsMenuOpen(false)}
+                    >
+                      <svg width="18" height="18" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M15 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm-9-2V7H4v3H1v2h3v3h2v-3h3v-2H6zm9 4c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                      </svg>
+                      Sign Up
+                    </a>
+                  </div>
+                </>
+              )}
             </div>
-          )}
+          </div>
         </div>
+      </div>
+
+      {/* Mobile Search Bar - Below Header */}
+      <div className="md:hidden bg-[#5f4191] px-4 py-3">
+        <SearchBar placeholder="Doctors" />
       </div>
 
       {/* Location Picker Modal */}
       <LocationPicker />
-    </header>
+    </div>
   );
 }

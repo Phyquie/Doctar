@@ -9,15 +9,15 @@ export default function AboutPage() {
         <meta name="description" content="Learn about Doctar's mission to connect patients with the best healthcare providers." />
       </Head>
       <div className="min-h-screen bg-gray-50">
-        <div className="max-w-4xl mx-auto px-4 py-16">
-          <div className="text-center mb-12">
-            <h1 className="text-4xl font-bold text-gray-900 mb-4">About Doctar</h1>
-            <p className="text-xl text-gray-600">Connecting patients with the best healthcare providers</p>
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
+          <div className="text-center mb-8 sm:mb-12">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">About Doctar</h1>
+            <p className="text-lg sm:text-xl text-gray-600">Connecting patients with the best healthcare providers</p>
           </div>
 
           <div className="prose prose-lg max-w-none">
-            <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our Mission</h2>
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-4">Our Mission</h2>
               <p className="text-gray-600 leading-relaxed">
                 At Doctar, we believe that quality healthcare should be accessible to everyone. Our platform connects patients 
                 with verified healthcare providers, making it easier to find the right doctor, book appointments, and access 
@@ -25,8 +25,8 @@ export default function AboutPage() {
               </p>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">What We Do</h2>
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-4">What We Do</h2>
               <ul className="text-gray-600 space-y-3">
                 <li className="flex items-start">
                   <span className="text-[#5f4191] mr-3">•</span>
@@ -51,17 +51,17 @@ export default function AboutPage() {
               </ul>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-8 mb-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Our Vision</h2>
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-4">Our Vision</h2>
               <p className="text-gray-600 leading-relaxed">
                 To become the leading healthcare platform that bridges the gap between patients and healthcare providers, 
                 ensuring that everyone has access to quality medical care when they need it most.
               </p>
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-8">
-              <h2 className="text-2xl font-semibold text-gray-900 mb-4">Why Choose Doctar?</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg shadow-sm p-4 sm:p-6 md:p-8">
+              <h2 className="text-xl sm:text-2xl font-semibold text-gray-900 mb-3 sm:mb-4">Why Choose Doctar?</h2>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Verified Doctors</h3>
                   <p className="text-gray-600">All doctors on our platform are verified and licensed professionals.</p>
