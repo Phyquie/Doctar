@@ -210,7 +210,7 @@ export default function TrendingReelsSection() {
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mt-8 sm:mt-[46px] mb-4 sm:mb-6">
         <h2 className="text-black text-xl sm:text-2xl font-bold mb-2 sm:mb-0">{getSectionTitle()}</h2>
         <Link 
-          href="/reels" 
+          href="/shorts" 
           className="text-purple-600 hover:text-purple-700 font-medium text-sm"
         >
           View All →
