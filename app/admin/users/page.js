@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { AdminService } from '../../services/adminService';
 import ViewModal from '../../components/ViewModal';
 import ConfirmationModal from '../../components/ConfirmationModal';
+import SuspensionReasonModal from '../../components/SuspensionReasonModal';
 
 const UserManagementPage = () => {
   const [users, setUsers] = useState([]);
@@ -14,10 +15,11 @@ const UserManagementPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedUser, setSelectedUser] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isSuspensionModalOpen, setIsSuspensionModalOpen] = useState(false);
+  const [selectedSuspendedUser, setSelectedSuspendedUser] = useState(null);
   const [stats, setStats] = useState({
     active: 0,
-    inactive: 0,
-    verified: 0,
+    suspended: 0,
     total: 0
   });
 
@@ -46,12 +48,11 @@ const UserManagementPage = () => {
   };
 
   const calculateStats = (usersList) => {
-    const active = usersList.filter(u => u.isActive).length;
-    const inactive = usersList.filter(u => !u.isActive).length;
-    const verified = usersList.filter(u => u.isEmailVerified).length;
+    const active = usersList.filter(u => u.isActive && !u.isSuspended).length;
+    const suspended = usersList.filter(u => u.isSuspended).length;
     const total = usersList.length;
 
-    setStats({ active, inactive, verified, total });
+    setStats({ active, suspended, total });
   };
 
   const filterUsers = () => {
@@ -71,13 +72,9 @@ const UserManagementPage = () => {
     // Status filter
     if (statusFilter !== 'all') {
       if (statusFilter === 'active') {
-        filtered = filtered.filter(u => u.isActive);
-      } else if (statusFilter === 'inactive') {
-        filtered = filtered.filter(u => !u.isActive);
-      } else if (statusFilter === 'verified') {
-        filtered = filtered.filter(u => u.isEmailVerified);
-      } else if (statusFilter === 'unverified') {
-        filtered = filtered.filter(u => !u.isEmailVerified);
+        filtered = filtered.filter(u => u.isActive && !u.isSuspended);
+      } else if (statusFilter === 'suspended') {
+        filtered = filtered.filter(u => u.isSuspended);
       }
     }
 
@@ -100,6 +97,16 @@ const UserManagementPage = () => {
   const handleCloseModal = () => {
     setIsViewModalOpen(false);
     setSelectedUser(null);
+  };
+
+  const handleViewSuspensionReason = (user) => {
+    setSelectedSuspendedUser(user);
+    setIsSuspensionModalOpen(true);
+  };
+
+  const handleCloseSuspensionModal = () => {
+    setIsSuspensionModalOpen(false);
+    setSelectedSuspendedUser(null);
   };
 
   const handleStatusChange = async (action, user) => {
@@ -192,12 +199,26 @@ const UserManagementPage = () => {
 
 
   const getStatusBadge = (user) => {
-    if (user.isActive && user.isEmailVerified) {
+    if (user.isSuspended) {
+      return (
+        <div className="flex items-center space-x-2">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Suspended</span>
+          <button
+            onClick={() => handleViewSuspensionReason(user)}
+            className="text-gray-500 hover:text-gray-700"
+            title="View suspension reason"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        </div>
+      );
+    } else if (user.isActive) {
       return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>;
-    } else if (!user.isEmailVerified) {
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Unverified</span>;
     } else {
-      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Inactive</span>;
+      return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Inactive</span>;
     }
   };
 
@@ -256,12 +277,6 @@ const UserManagementPage = () => {
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3">
-        <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          <span>Add User</span>
-        </button>
         <button className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors">
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
@@ -280,7 +295,7 @@ const UserManagementPage = () => {
       </div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
             <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
@@ -298,29 +313,14 @@ const UserManagementPage = () => {
 
         <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
           <div className="flex items-center">
-            <div className="w-12 h-12 bg-yellow-100 rounded-full flex items-center justify-center">
-              <svg className="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </div>
-            <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Unverified</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.total - stats.verified}</p>
-              <p className="text-sm text-gray-500">Awaiting verification</p>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-          <div className="flex items-center">
             <div className="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
               <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L4.35 16.5c-.77.833.192 2.5 1.732 2.5z" />
               </svg>
             </div>
             <div className="ml-4">
-              <p className="text-sm font-medium text-gray-600">Inactive</p>
-              <p className="text-2xl font-bold text-gray-900">{stats.inactive}</p>
+              <p className="text-sm font-medium text-gray-600">Suspended</p>
+              <p className="text-2xl font-bold text-gray-900">{stats.suspended}</p>
               <p className="text-sm text-gray-500">Suspended accounts</p>
             </div>
           </div>
@@ -369,9 +369,7 @@ const UserManagementPage = () => {
             >
               <option value="all">All Status ({stats.total})</option>
               <option value="active">Active ({stats.active})</option>
-              <option value="inactive">Inactive ({stats.inactive})</option>
-              <option value="verified">Verified ({stats.verified})</option>
-              <option value="unverified">Unverified ({stats.total - stats.verified})</option>
+              <option value="suspended">Suspended ({stats.suspended})</option>
             </select>
           </div>
         </div>
@@ -387,7 +385,6 @@ const UserManagementPage = () => {
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Contact & Location</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Gender & Age</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Verification</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Joined</th>
                 <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
               </tr>
@@ -430,25 +427,6 @@ const UserManagementPage = () => {
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
                     {getStatusBadge(user)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      {user.isEmailVerified ? (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                          </svg>
-                          Verified
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                          Pending
-                        </span>
-                      )}
-                    </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                     {formatDate(user.createdAt)}
@@ -532,6 +510,13 @@ const UserManagementPage = () => {
         data={selectedUser}
         type="user"
         onStatusChange={handleStatusChangeFromModal}
+      />
+
+      {/* Suspension Reason Modal */}
+      <SuspensionReasonModal
+        isOpen={isSuspensionModalOpen}
+        onClose={handleCloseSuspensionModal}
+        user={selectedSuspendedUser}
       />
 
     </div>

@@ -246,6 +246,28 @@ export class AdminService {
     }
   }
 
+  // Add doctor by admin
+  static async addDoctor(doctorData) {
+    try {
+      const response = await fetch('/api/admin/addDoctorByAdmin', {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(doctorData)
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Failed to add doctor');
+      }
+
+      return result;
+    } catch (error) {
+      console.error('Error adding doctor:', error);
+      throw error;
+    }
+  }
+
   // Get blogs list with pagination
   static async getBlogs(page = 1, limit = 10, search = '', author = '') {
     try {
@@ -621,7 +643,7 @@ export class AdminService {
     }
   }
 
-  // Reels Management
+    // Reels Management (Admin APIs)
   static async getReels(page = 1, limit = 10, search = '', location = '', category = '', author = '') {
     try {
       const params = new URLSearchParams({
@@ -633,7 +655,7 @@ export class AdminService {
         ...(author && { author })
       });
 
-      const response = await fetch(`/api/reels?${params}`, {
+      const response = await fetch(`/api/admin/reels?${params}`, {
         method: 'GET',
         headers: this.getAuthHeaders()
       });
@@ -652,7 +674,7 @@ export class AdminService {
 
   static async getReel(reelId) {
     try {
-      const response = await fetch(`/api/reels/${reelId}`, {
+      const response = await fetch(`/api/admin/reels/${reelId}`, {
         method: 'GET',
         headers: this.getAuthHeaders()
       });
@@ -672,7 +694,14 @@ export class AdminService {
   static async createReel(reelData) {
     try {
       console.log('AdminService.createReel called with:', reelData);
-      const response = await fetch('/api/reels', {
+      
+      // Validate required fields for new schema
+      if (!reelData.title || !reelData.description || !reelData.iframeUrl || 
+          !reelData.location || !reelData.address || !reelData.coordinates) {
+        throw new Error('Missing required fields: title, description, iframeUrl, location, address, and coordinates are required');
+      }
+
+      const response = await fetch('/api/admin/reels', {
         method: 'POST',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(reelData)
@@ -695,7 +724,13 @@ export class AdminService {
 
   static async updateReel(reelId, reelData) {
     try {
-      const response = await fetch(`/api/reels/${reelId}`, {
+      // Validate required fields for new schema
+      if (!reelData.title || !reelData.description || !reelData.iframeUrl || 
+          !reelData.location || !reelData.address || !reelData.coordinates) {
+        throw new Error('Missing required fields: title, description, iframeUrl, location, address, and coordinates are required');
+      }
+
+      const response = await fetch(`/api/admin/reels/${reelId}`, {
         method: 'PUT',
         headers: this.getAuthHeaders(),
         body: JSON.stringify(reelData)
@@ -715,7 +750,7 @@ export class AdminService {
 
   static async deleteReel(reelId) {
     try {
-      const response = await fetch(`/api/reels/${reelId}`, {
+      const response = await fetch(`/api/admin/reels/${reelId}`, {
         method: 'DELETE',
         headers: this.getAuthHeaders()
       });
@@ -728,6 +763,131 @@ export class AdminService {
       return await response.json();
     } catch (error) {
       console.error('Error deleting reel:', error);
+      throw error;
+    }
+  }
+
+  // Videos Management (Admin APIs)
+  static async getVideos(page = 1, limit = 10, search = '', location = '', category = '', author = '', difficulty = '') {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+        ...(search && { search }),
+        ...(location && { location }),
+        ...(category && { category }),
+        ...(author && { author }),
+        ...(difficulty && { difficulty })
+      });
+
+      const response = await fetch(`/api/admin/videos?${params}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch videos');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching videos:', error);
+      throw error;
+    }
+  }
+
+  static async getVideo(videoId) {
+    try {
+      const response = await fetch(`/api/admin/videos/${videoId}`, {
+        method: 'GET',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch video');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error fetching video:', error);
+      throw error;
+    }
+  }
+
+  static async createVideo(videoData) {
+    try {
+      console.log('AdminService.createVideo called with:', videoData);
+      
+      // Validate required fields for video schema
+      if (!videoData.title || !videoData.description || !videoData.iframeUrl || 
+          !videoData.location || !videoData.address || !videoData.coordinates) {
+        throw new Error('Missing required fields: title, description, iframeUrl, location, address, and coordinates are required');
+      }
+
+      const response = await fetch('/api/admin/videos', {
+        method: 'POST',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(videoData)
+      });
+
+      console.log('Create video response status:', response.status);
+      const responseData = await response.json();
+      console.log('Create video response data:', responseData);
+
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Failed to create video');
+      }
+
+      return responseData;
+    } catch (error) {
+      console.error('Error creating video:', error);
+      throw error;
+    }
+  }
+
+  static async updateVideo(videoId, videoData) {
+    try {
+      // Validate required fields for video schema
+      if (!videoData.title || !videoData.description || !videoData.iframeUrl || 
+          !videoData.location || !videoData.address || !videoData.coordinates) {
+        throw new Error('Missing required fields: title, description, iframeUrl, location, address, and coordinates are required');
+      }
+
+      const response = await fetch(`/api/admin/videos/${videoId}`, {
+        method: 'PUT',
+        headers: this.getAuthHeaders(),
+        body: JSON.stringify(videoData)
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to update video');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error updating video:', error);
+      throw error;
+    }
+  }
+
+  static async deleteVideo(videoId) {
+    try {
+      const response = await fetch(`/api/admin/videos/${videoId}`, {
+        method: 'DELETE',
+        headers: this.getAuthHeaders()
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to delete video');
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error('Error deleting video:', error);
       throw error;
     }
   }

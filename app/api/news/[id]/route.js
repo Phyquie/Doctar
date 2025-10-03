@@ -7,7 +7,7 @@ export async function GET(request, { params }) {
   try {
     await connectDB();
 
-    const news = await News.findById(params.id)
+    const news = await News.findOne({ slug: params.id })
       .populate('author', 'firstName lastName email');
 
     if (!news) {

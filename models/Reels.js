@@ -28,6 +28,22 @@ const reelsSchema = new mongoose.Schema({
     trim: true,
     maxlength: 100
   },
+  address: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: 500
+  },
+  coordinates: {
+    latitude: {
+      type: Number,
+      required: true
+    },
+    longitude: {
+      type: Number,
+      required: true
+    }
+  },
   category: {
     type: String,
     required: true,

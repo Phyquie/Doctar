@@ -3,19 +3,24 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useAppSelector, useAppDispatch } from '../store/hooks';
+import { selectUser, logout } from '../store/slices/authSlice';
 
 const AdminLayout = ({ children }) => {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const pathname = usePathname();
+  const dispatch = useAppDispatch();
+  const currentUser = useAppSelector(selectUser);
 
   const navigationItems = [
     { name: 'Dashboard', href: '/admin/dashboard', icon: 'grid' },
     { name: 'Users', href: '/admin/users', icon: 'users' },
     { name: 'Doctors', href: '/admin/doctor', icon: 'user-md' },
-    { name: 'Appointments', href: '/admin/appointments', icon: 'calendar' },
+    // { name: 'Appointments', href: '/admin/appointments', icon: 'calendar' },
     { name: 'News', href: '/admin/news', icon: 'newspaper' },
     { name: 'Blogs', href: '/admin/blogs', icon: 'edit' },
     { name: 'Reels & Shorts', href: '/admin/reels', icon: 'video' },
+    { name: 'Videos', href: '/admin/videos', icon: 'video' }
   ];
 
   const isActive = (href) => pathname === href;
@@ -23,7 +28,7 @@ const AdminLayout = ({ children }) => {
   return (
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
-      <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'} bg-purple-800 transition-all duration-300 flex flex-col`}>
+      <div className={`${sidebarCollapsed ? 'w-16' : 'w-64'}  bg-[#5f4191] transition-all duration-300 flex flex-col`}>
         {/* Logo Section */}
         <div className="p-4 border-b border-purple-700">
           <div className="flex items-center justify-between">
@@ -58,8 +63,8 @@ const AdminLayout = ({ children }) => {
                   href={item.href}
                   className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
                     isActive(item.href)
-                      ? 'bg-purple-600 text-white'
-                      : 'text-purple-200 hover:bg-purple-700 hover:text-white'
+                      ? ' bg-[#3a2758] text-white'
+                      : 'text-purple-200 hover:bg-[#3a2758] hover:text-white'
                   }`}
                 >
                   <div className="w-5 h-5 flex items-center justify-center">
@@ -108,7 +113,19 @@ const AdminLayout = ({ children }) => {
 
         {/* Logout */}
         <div className="p-4 border-t border-purple-700">
-          <button className="flex items-center space-x-3 px-3 py-2 text-purple-200 hover:bg-purple-700 hover:text-white rounded-lg transition-colors w-full">
+          <button 
+            onClick={() => {
+              dispatch(logout());
+              // Clear localStorage
+              if (typeof window !== 'undefined') {
+                localStorage.removeItem('authToken');
+                localStorage.removeItem('userRole');
+              }
+              // Redirect to login
+              window.location.href = '/auth/login';
+            }}
+            className="flex items-center space-x-3 px-3 py-2 text-purple-200 hover:bg-purple-700 hover:text-white rounded-lg transition-colors w-full"
+          >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
@@ -124,7 +141,9 @@ const AdminLayout = ({ children }) => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
-              <p className="text-gray-600">Welcome back, samir kumar</p>
+              <p className="text-gray-600">
+                Welcome back{currentUser ? `, ${currentUser.firstName} ${currentUser.lastName}` : ''}
+              </p>
             </div>
             <div className="flex items-center space-x-4">
               {/* Search */}
@@ -142,20 +161,19 @@ const AdminLayout = ({ children }) => {
               </div>
 
               {/* Notifications */}
-              <button className="p-2 text-gray-400 hover:text-gray-600 relative">
-                <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 17h5l-5 5v-5zM4.828 7l2.586 2.586a2 2 0 002.828 0L12.828 7H4.828z" />
-                </svg>
-                <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-red-400 ring-2 ring-white"></span>
-              </button>
+          
 
               {/* User Profile */}
               <div className="flex items-center space-x-3">
                 <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
-                  <span className="text-white text-sm font-medium">SK</span>
+                  <span className="text-white text-sm font-medium">
+                    {currentUser ? `${currentUser.firstName?.[0] || ''}${currentUser.lastName?.[0] || ''}` : 'AD'}
+                  </span>
                 </div>
                 <div className="hidden md:block">
-                  <p className="text-sm font-medium text-gray-900">samir kumar</p>
+                  <p className="text-sm font-medium text-gray-900">
+                    {currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : 'Administrator'}
+                  </p>
                   <p className="text-xs text-gray-500">Administrator</p>
                 </div>
                 <button className="text-gray-400 hover:text-gray-600">

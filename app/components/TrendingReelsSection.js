@@ -2,27 +2,44 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { FaPlay, FaClock, FaMapMarkerAlt, FaUser, FaHeart, FaShare } from 'react-icons/fa';
+import { FaPlay, FaPause, FaClock, FaMapMarkerAlt, FaUser, FaHeart, FaShare, FaTimes } from 'react-icons/fa';
+import { useAppSelector } from '../store/hooks';
+import { selectCurrentLocation } from '../store/slices/locationSlice';
 
 export default function TrendingReelsSection() {
   const [reels, setReels] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mounted, setMounted] = useState(false);
+  const [playingReel, setPlayingReel] = useState(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  
+  // Get current location from Redux store
+  const currentLocation = useAppSelector(selectCurrentLocation);
 
   useEffect(() => {
     setMounted(true);
-    fetchReels();
-  }, []);
+    // Only fetch if we have a location (Redux store is ready)
+    if (currentLocation) {
+      fetchReels();
+    }
+  }, [currentLocation]); // Re-fetch when location changes
 
   const fetchReels = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/reels?limit=6&featured=true');
+      
+      // Get user location from Redux store
+      const location = currentLocation?.city || currentLocation?.name || 'Mumbai';
+      
+      console.log('Fetching reels for location:', location, 'Full location object:', currentLocation);
+      
+      // Fetch reels with location filtering from Redux store
+      const response = await fetch(`/api/reels?location=${encodeURIComponent(location)}&limit=6`);
       const data = await response.json();
       
-      if (data.success) {
-        setReels(data.data.reels);
+      if (data.success && data.data) {
+        setReels(data.data.reels || []);
       } else {
         setError('Failed to fetch reels');
       }
@@ -44,9 +61,81 @@ export default function TrendingReelsSection() {
     const date = new Date(dateString);
     const year = date.getFullYear();
     const month = date.toLocaleString('en-US', { month: 'long' });
-    const day = date.getDate();
-    return `${month} ${day}, ${year}`;
+    return `${month} ${year}`;
   };
+
+  const handleVideoClick = (reelId) => {
+    if (playingReel === reelId) {
+      // If same reel is clicked, toggle play/pause
+      setIsPlaying(!isPlaying);
+    } else {
+      // If different reel is clicked, start playing new reel
+      setPlayingReel(reelId);
+      setIsPlaying(true);
+    }
+  };
+
+  const handleVideoEnded = () => {
+    setIsPlaying(false);
+    setPlayingReel(null);
+  };
+
+  const handleCloseVideo = (reelId, e) => {
+    e.stopPropagation();
+    setIsPlaying(false);
+    setPlayingReel(null);
+  };
+
+  const extractVideoId = (url) => {
+    if (!url) return null;
+    
+    // If it's an iframe HTML string, extract the src URL first
+    if (url.includes('<iframe')) {
+      const srcMatch = url.match(/src="([^"]+)"/);
+      if (srcMatch) {
+        url = srcMatch[1];
+      }
+    }
+    
+    // Handle YouTube URLs
+    const youtubeMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
+    if (youtubeMatch) return youtubeMatch[1];
+    
+    // Handle direct video URLs
+    return url;
+  };
+
+  const isYouTubeUrl = (url) => {
+    if (!url) return false;
+    // Check both direct URL and iframe HTML content
+    return url.includes('youtube.com') || url.includes('youtu.be');
+  };
+
+  const getSectionTitle = () => {
+    const locationName = currentLocation?.city || currentLocation?.name || 'Local';
+    return `Trending Shorts by ${locationName} Doctors `;
+  };
+
+  // Early return if Redux store is not ready yet
+  if (!mounted || !currentLocation) {
+    return (
+      <div className="mt-6">
+        <h2 className="text-black text-2xl font-bold mt-[46px] ml-[30px]">Loading Reels...</h2>
+        <div className="flex p-6 overflow-auto scrollbar-hide scroll-smooth gap-4">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow min-w-[300px] h-[600px] animate-pulse">
+              <div className="h-96 bg-gray-300 rounded-t-4xl"></div>
+              <div className="flex-col flex-1 p-4">
+                <div className="h-6 bg-gray-300 rounded mb-2"></div>
+                <div className="h-4 bg-gray-300 rounded mb-2"></div>
+                <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
 
   const truncateText = (text, maxLength = 100) => {
     if (text.length <= maxLength) return text;
@@ -57,11 +146,11 @@ export default function TrendingReelsSection() {
   if (!mounted) {
     return (
       <div className="mt-6">
-        <h2 className="text-black text-2xl font-bold mt-[46px] ml-[30px]">Trending Reels & Shorts</h2>
+        <h2 className="text-black text-2xl font-bold mt-[46px] ml-[30px]">{getSectionTitle()}</h2>
         <div className="flex p-6 overflow-auto scrollbar-hide scroll-smooth gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow min-w-[300px] h-[400px] animate-pulse">
-              <div className="h-48 bg-gray-300 rounded-t-4xl"></div>
+            <div key={i} className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow min-w-[300px] h-[600px] animate-pulse">
+              <div className="h-96 bg-gray-300 rounded-t-4xl"></div>
               <div className="flex-col flex-1 p-4">
                 <div className="h-6 bg-gray-300 rounded mb-2"></div>
                 <div className="h-4 bg-gray-300 rounded mb-2"></div>
@@ -77,11 +166,11 @@ export default function TrendingReelsSection() {
   if (loading) {
     return (
       <div className="mt-6">
-        <h2 className="text-black text-2xl font-bold mt-[46px] ml-[30px]">Trending Reels & Shorts</h2>
+        <h2 className="text-black text-2xl font-bold mt-[46px] ml-[30px]">{getSectionTitle()}</h2>
         <div className="flex p-6 overflow-auto scrollbar-hide scroll-smooth gap-4">
           {[1, 2, 3].map((i) => (
-            <div key={i} className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow min-w-[300px] h-[400px] animate-pulse">
-              <div className="h-48 bg-gray-300 rounded-t-4xl"></div>
+            <div key={i} className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow min-w-[300px] h-[600px] animate-pulse">
+              <div className="h-96 bg-gray-300 rounded-t-4xl"></div>
               <div className="flex-col flex-1 p-4">
                 <div className="h-6 bg-gray-300 rounded mb-2"></div>
                 <div className="h-4 bg-gray-300 rounded mb-2"></div>
@@ -97,7 +186,7 @@ export default function TrendingReelsSection() {
   if (error) {
     return (
       <div className="mt-6">
-        <h2 className="text-black text-2xl font-bold mt-[46px] ml-[30px]">Trending Reels & Shorts</h2>
+        <h2 className="text-black text-2xl font-bold mt-[46px] ml-[30px]">{getSectionTitle()}</h2>
         <div className="p-6 text-center">
           <p className="text-gray-500">Unable to load reels at the moment.</p>
         </div>
@@ -105,10 +194,10 @@ export default function TrendingReelsSection() {
     );
   }
 
-  if (reels.length === 0) {
+  if (!reels || reels.length === 0) {
     return (
       <div className="mt-6">
-        <h2 className="text-black text-2xl font-bold mt-[46px] ml-[30px]">Trending Reels & Shorts</h2>
+        <h2 className="text-black text-2xl font-bold mt-[46px] ml-[30px]">{getSectionTitle()}</h2>
         <div className="p-6 text-center">
           <p className="text-gray-500">No reels available yet.</p>
         </div>
@@ -119,7 +208,7 @@ export default function TrendingReelsSection() {
   return (
     <div className="mt-6">
       <div className="flex justify-between items-center mt-[46px] ml-[30px] mr-[30px]">
-        <h2 className="text-black text-2xl font-bold">Trending Reels & Shorts</h2>
+        <h2 className="text-black text-2xl font-bold">{getSectionTitle()}</h2>
         <Link 
           href="/reels" 
           className="text-purple-600 hover:text-purple-700 font-medium text-sm"
@@ -128,26 +217,104 @@ export default function TrendingReelsSection() {
         </Link>
       </div>
       <div className="flex p-6 overflow-auto scrollbar-hide scroll-smooth gap-4">
-        {reels.map((reel) => (
+        {reels && reels.map((reel) => (
           <div 
             key={reel._id} 
-            className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow w-[300px] h-[400px] hover:shadow-lg transition-shadow duration-300"
+            className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow w-[300px] h-[500px] hover:shadow-lg transition-shadow duration-300"
           >
             <div className="relative flex-shrink-0">
-              {reel.thumbnail ? (
-                <img 
-                  src={reel.thumbnail} 
-                  alt={reel.title}
-                  className="w-full h-48 object-cover rounded-t-4xl"
-                />
+              {playingReel === reel._id ? (
+                // Video Player when playing - Reel aspect ratio (9:16)
+                <div className="relative w-full h-96 rounded-t-4xl overflow-hidden bg-black">
+                  {(reel.iframeLink || reel.iframeUrl) && isYouTubeUrl(reel.iframeLink || reel.iframeUrl) ? (
+                    // YouTube iframe with reel aspect ratio
+                    <iframe
+                      src={`https://www.youtube.com/embed/${extractVideoId(reel.iframeLink || reel.iframeUrl)}?autoplay=${isPlaying ? 1 : 0}&controls=1&rel=0&modestbranding=1`}
+                      title={reel.title}
+                      className="w-full h-full"
+                      frameBorder="0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
+                  ) : (reel.iframeLink || reel.iframeUrl) ? (
+                    // Other video URLs (direct video files)
+                    <video
+                      className="w-full h-full object-cover"
+                      controls
+                      autoPlay={isPlaying}
+                      onEnded={handleVideoEnded}
+                      preload="metadata"
+                    >
+                      <source src={reel.iframeLink || reel.iframeUrl} type="video/mp4" />
+                      <source src={reel.iframeLink || reel.iframeUrl} type="video/webm" />
+                      <source src={reel.iframeLink || reel.iframeUrl} type="video/ogg" />
+                      Your browser does not support the video tag.
+                    </video>
+                  ) : (
+                    <div className="w-full h-full flex items-center justify-center text-white bg-gray-800">
+                      <p className="text-center px-4">Video not available</p>
+                    </div>
+                  )}
+                  {/* Play/Pause overlay for non-YouTube videos only */}
+                  {(reel.iframeLink || reel.iframeUrl) && !isYouTubeUrl(reel.iframeLink || reel.iframeUrl) && (
+                    <div 
+                      className="absolute inset-0 bg-black/20 hover:bg-black/30 flex items-center justify-center cursor-pointer transition-colors opacity-0 hover:opacity-100"
+                      onClick={() => handleVideoClick(reel._id)}
+                    >
+                      <div className="bg-white/90 rounded-full p-3">
+                        {isPlaying ? (
+                          <FaPause className="text-purple-600 text-xl" />
+                        ) : (
+                          <FaPlay className="text-purple-600 text-xl ml-1" />
+                        )}
+                      </div>
+                    </div>
+                  )}
+                </div>
               ) : (
-                <div className="w-full h-48 bg-gradient-to-br from-purple-400 to-purple-600 rounded-t-4xl flex items-center justify-center">
-                  <FaPlay className="text-white text-4xl" />
+                // Thumbnail when not playing - Reel aspect ratio (9:16)
+                <div 
+                  className="relative w-full h-96 cursor-pointer group"
+                  onClick={() => handleVideoClick(reel._id)}
+                >
+                  {reel.thumbnail ? (
+                    <img 
+                      src={reel.thumbnail} 
+                      alt={reel.title}
+                      className="w-full h-96 object-cover rounded-t-4xl group-hover:opacity-90 transition-opacity"
+                    />
+                  ) : (
+                    <div className="w-full h-96 bg-gradient-to-br from-purple-400 to-purple-600 rounded-t-4xl flex items-center justify-center">
+                      <FaPlay className="text-white text-4xl" />
+                    </div>
+                  )}
+                  {/* Play button overlay */}
+                  <div className="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity rounded-t-4xl">
+                    <div className="bg-white/90 rounded-full p-3">
+                      <FaPlay className="text-purple-600 text-xl ml-1" />
+                    </div>
+                  </div>
                 </div>
               )}
-              <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full text-xs text-gray-600">
-                {reel.category}
-              </div>
+              
+              {/* Overlay information */}
+              {playingReel === reel._id ? (
+                // Close button when video is playing
+                <div className="absolute top-2 right-2">
+                  <button
+                    onClick={(e) => handleCloseVideo(reel._id, e)}
+                    className="bg-white/90 hover:bg-white text-gray-600 hover:text-gray-800 rounded-full p-2 transition-colors"
+                  >
+                    <FaTimes className="w-3 h-3" />
+                  </button>
+                </div>
+              ) : (
+                // Category badge when showing thumbnail
+                <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full text-xs text-gray-600">
+                  {reel.category}
+                </div>
+              )}
+              
               <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center">
                 <FaClock className="w-3 h-3 mr-1" />
                 {formatDuration(reel.duration)}
@@ -172,26 +339,6 @@ export default function TrendingReelsSection() {
                     Dr. {reel.author.firstName} {reel.author.lastName}
                   </span>
                 )}
-              </div>
-              <div className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide max-h-32">
-                <p className="text-gray-500 text-sm leading-relaxed break-words">
-                  {reel.description}
-                </p>
-              </div>
-              <div className="flex items-center justify-between mt-2 pt-2 border-t border-gray-200">
-                <div className="flex items-center space-x-3 text-xs text-gray-500">
-                  <span className="flex items-center">
-                    <FaHeart className="w-3 h-3 mr-1" />
-                    {reel.likeCount || 0}
-                  </span>
-                  <span className="flex items-center">
-                    <FaShare className="w-3 h-3 mr-1" />
-                    {reel.shareCount || 0}
-                  </span>
-                </div>
-                <span className="text-xs text-gray-400">
-                  {formatDate(reel.publishedAt)}
-                </span>
               </div>
             </div>
           </div>

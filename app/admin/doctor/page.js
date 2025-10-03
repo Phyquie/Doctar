@@ -3,8 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import { AdminService } from '../../services/adminService';
 import ViewModal from '../../components/ViewModal';
-import ConfirmationModal from '../../components/ConfirmationModal';
-import SimpleModal from '../../components/SimpleModal';
+
+import AddDoctorModal from '../../components/AddDoctorModal';
 
 const DoctorManagementPage = () => {
   const [doctors, setDoctors] = useState([]);
@@ -15,6 +15,7 @@ const DoctorManagementPage = () => {
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedDoctor, setSelectedDoctor] = useState(null);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [stats, setStats] = useState({
     approved: 0,
     pending: 0,
@@ -100,6 +101,26 @@ const DoctorManagementPage = () => {
   const handleCloseModal = () => {
     setIsViewModalOpen(false);
     setSelectedDoctor(null);
+  };
+
+  const handleAddDoctor = () => {
+    setIsAddModalOpen(true);
+  };
+
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+  };
+
+  const handleSubmitAddDoctor = async (doctorData) => {
+    try {
+      await AdminService.addDoctor(doctorData);
+      await fetchDoctors(); // Refresh the doctors list
+      alert('Doctor added successfully!');
+    } catch (error) {
+      console.error('Error adding doctor:', error);
+      alert('Failed to add doctor: ' + error.message);
+      throw error; // Re-throw to let modal handle loading state
+    }
   };
 
   const handleStatusChange = async (action, doctor) => {
@@ -236,7 +257,10 @@ const DoctorManagementPage = () => {
 
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3">
-        <button className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+        <button 
+          onClick={handleAddDoctor}
+          className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+        >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
           </svg>
@@ -489,6 +513,13 @@ const DoctorManagementPage = () => {
         data={selectedDoctor}
         type="doctor"
         onStatusChange={handleStatusChangeFromModal}
+      />
+
+      {/* Add Doctor Modal */}
+      <AddDoctorModal
+        isOpen={isAddModalOpen}
+        onClose={handleCloseAddModal}
+        onSubmit={handleSubmitAddDoctor}
       />
 
     </div>

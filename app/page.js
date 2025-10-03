@@ -10,7 +10,6 @@ import HowItWorksSection from './components/HowItWorksSection';
 import VisionMissionSection from './components/VisionMissionSection';
 import NewsGuideSection from './components/NewsGuideSection';
 import BlogSection from './components/BlogSection';
-import TrendingShortsSection from './components/TrendingShortsSection';
 import TrendingVideosSection from './components/TrendingVideosSection';
 import TrendingReelsSection from './components/TrendingReelsSection';
 import TalkWithExpertSection from './components/TalkWithExpertSection';
@@ -59,7 +58,6 @@ export default function Home() {
       <NewsGuideSection />
       <BlogSection />
       <TrendingReelsSection />
-      <TrendingShortsSection />
       <TrendingVideosSection />
       <TalkWithExpertSection />
       

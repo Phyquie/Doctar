@@ -2,6 +2,8 @@
 
 import { useState, useEffect } from 'react';
 import { AdminService } from '../../services/adminService';
+import LocationPicker from '../../components/LocationPicker';
+import { GeocodingService } from '../../services/geocoding';
 import { FaSearch, FaPlus, FaEdit, FaTrash, FaEye, FaCalendarAlt, FaUser, FaMapMarkerAlt, FaVideo, FaClock } from 'react-icons/fa';
 
 export default function ReelsManagementPage() {
@@ -14,6 +16,8 @@ export default function ReelsManagementPage() {
   const [showForm, setShowForm] = useState(false);
   const [editingReel, setEditingReel] = useState(null);
   const [doctors, setDoctors] = useState([]);
+  const [showLocationPicker, setShowLocationPicker] = useState(false);
+  const [isLocationLoading, setIsLocationLoading] = useState(false);
   const [stats, setStats] = useState({
     total: 0,
     reels: 0,
@@ -30,6 +34,11 @@ export default function ReelsManagementPage() {
     iframeUrl: '',
     thumbnail: '',
     location: '',
+    address: '',
+    coordinates: {
+      latitude: '',
+      longitude: ''
+    },
     category: 'reel',
     duration: 60,
     tags: [],
@@ -125,6 +134,11 @@ export default function ReelsManagementPage() {
       iframeUrl: '',
       thumbnail: '',
       location: '',
+      address: '',
+      coordinates: {
+        latitude: '',
+        longitude: ''
+      },
       category: 'reel',
       duration: 60,
       tags: [],
@@ -152,6 +166,11 @@ export default function ReelsManagementPage() {
         iframeUrl: '<iframe src=\'https://www.youtube.com/embed/dQw4w9WgXcQ\' width=\'300\' height=\'200\' frameborder=\'0\' allowfullscreen></iframe>',
         thumbnail: 'https://picsum.photos/300/200',
         location: 'Mumbai',
+        address: 'Mumbai, Maharashtra, India',
+        coordinates: {
+          latitude: 19.0760,
+          longitude: 72.8777
+        },
         category: 'reel',
         duration: 60,
         tags: ['test', 'demo'],
@@ -180,6 +199,11 @@ export default function ReelsManagementPage() {
       iframeUrl: reel.iframeUrl,
       thumbnail: reel.thumbnail,
       location: reel.location,
+      address: reel.address || '',
+      coordinates: {
+        latitude: reel.coordinates?.latitude || '',
+        longitude: reel.coordinates?.longitude || ''
+      },
       category: reel.category,
       duration: reel.duration,
       tags: reel.tags,
@@ -196,14 +220,16 @@ export default function ReelsManagementPage() {
     console.log('Available doctors:', doctors);
     
     // Validate required fields
-    if (!formData.title || !formData.description || !formData.iframeUrl || !formData.location || !formData.author) {
+    if (!formData.title || !formData.description || !formData.iframeUrl || !formData.location || !formData.address || !formData.coordinates.latitude || !formData.coordinates.longitude || !formData.author) {
       console.log('Validation failed - missing required fields');
       console.log('Title:', formData.title);
       console.log('Description:', formData.description);
       console.log('IframeUrl:', formData.iframeUrl);
       console.log('Location:', formData.location);
+      console.log('Address:', formData.address);
+      console.log('Coordinates:', formData.coordinates);
       console.log('Author:', formData.author);
-      alert('Please fill in all required fields');
+      alert('Please fill in all required fields including location coordinates');
       return;
     }
     
@@ -225,6 +251,11 @@ export default function ReelsManagementPage() {
         iframeUrl: '',
         thumbnail: '',
         location: '',
+        address: '',
+        coordinates: {
+          latitude: '',
+          longitude: ''
+        },
         category: 'reel',
         duration: 60,
         tags: [],
@@ -250,6 +281,96 @@ export default function ReelsManagementPage() {
         alert('Failed to delete reel: ' + error.message);
       }
     }
+  };
+
+  const getCurrentLocation = async () => {
+    setIsLocationLoading(true);
+    try {
+      const position = await new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+          reject(new Error('Geolocation is not supported by this browser.'));
+          return;
+        }
+        
+        navigator.geolocation.getCurrentPosition(
+          resolve,
+          reject,
+          {
+            enableHighAccuracy: true,
+            timeout: 10000,
+            maximumAge: 0
+          }
+        );
+      });
+
+      const { latitude, longitude } = position.coords;
+      
+      try {
+        const locationData = await GeocodingService.reverseGeocode(latitude, longitude);
+        
+        if (locationData && locationData.city) {
+          setFormData(prev => ({
+            ...prev,
+            coordinates: {
+              latitude: latitude,
+              longitude: longitude
+            },
+            location: locationData.city,
+            address: locationData.address || `${locationData.city}, ${locationData.state || ''}`.trim().replace(/,$/, '')
+          }));
+        } else {
+          setFormData(prev => ({
+            ...prev,
+            coordinates: {
+              latitude: latitude,
+              longitude: longitude
+            },
+            location: 'Current Location',
+            address: `${latitude.toFixed(4)}, ${longitude.toFixed(4)}`
+          }));
+        }
+      } catch (geocodingError) {
+        console.error('Reverse geocoding failed:', geocodingError);
+        setFormData(prev => ({
+          ...prev,
+          coordinates: {
+            latitude: latitude,
+            longitude: longitude
+          },
+          location: 'Location Found',
+          address: `Lat: ${latitude.toFixed(4)}, Lng: ${longitude.toFixed(4)}`
+        }));
+      }
+      
+    } catch (error) {
+      console.error('Error getting location:', error);
+      let errorMessage = 'Unable to get your current location.';
+      
+      if (error.code === 1) {
+        errorMessage = 'Location access denied. Please enable location permissions in your browser.';
+      } else if (error.code === 2) {
+        errorMessage = 'Location unavailable. Please check your GPS settings.';
+      } else if (error.code === 3) {
+        errorMessage = 'Location request timed out. Please try again.';
+      }
+      
+      alert(errorMessage);
+    } finally {
+      setIsLocationLoading(false);
+    }
+  };
+
+  const handleLocationSelect = (coordinates) => {
+    setFormData(prev => ({
+      ...prev,
+      coordinates: {
+        latitude: coordinates.latitude,
+        longitude: coordinates.longitude
+      },
+      location: coordinates.city || coordinates.address || prev.location,
+      address: coordinates.address || prev.address
+    }));
+    setShowLocationPicker(false);
   };
 
   const handlePageChange = (page) => {
@@ -588,14 +709,123 @@ export default function ReelsManagementPage() {
                 </div>
                 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Location *</label>
                   <input
                     type="text"
                     value={formData.location}
                     onChange={(e) => setFormData({ ...formData, location: e.target.value })}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                    placeholder="City/Location"
                     required
                   />
+                </div>
+                
+                <div className="md:col-span-2">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                  <div className="flex gap-2">
+                    <textarea
+                      value={formData.address}
+                      onChange={(e) => setFormData({ ...formData, address: e.target.value })}
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                      placeholder="Enter complete address"
+                      rows="2"
+                      required
+                    />
+                    <div className="flex flex-col gap-2">
+                      <button
+                        type="button"
+                        onClick={getCurrentLocation}
+                        disabled={isLocationLoading}
+                        className="px-3 py-2 bg-green-600 text-white rounded-md hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed flex items-center gap-1 text-sm"
+                        title="Get current location automatically"
+                      >
+                        {isLocationLoading ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            <span className="hidden sm:inline">Getting...</span>
+                          </>
+                        ) : (
+                          <>
+                            <FaMapMarkerAlt className="w-4 h-4" />
+                            <span className="hidden sm:inline">Current</span>
+                          </>
+                        )}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setShowLocationPicker(true)}
+                        className="px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 flex items-center gap-1"
+                        title="Pick location on map"
+                      >
+                        <FaSearch className="w-4 h-4" />
+                        <span className="hidden sm:inline">Map</span>
+                      </button>
+                    </div>
+                  </div>
+                  
+                  {/* Location Status Display */}
+                  {formData.coordinates.latitude && formData.coordinates.longitude ? (
+                    <div className="mt-3 p-3 bg-green-50 border border-green-200 rounded-md">
+                      <div className="flex items-start gap-2">
+                        <FaMapMarkerAlt className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <p className="text-sm font-medium text-green-800 mb-1">📍 Location Selected</p>
+                          <p className="text-sm text-green-700">
+                            <strong>Coordinates:</strong> {parseFloat(formData.coordinates.latitude).toFixed(6)}, {parseFloat(formData.coordinates.longitude).toFixed(6)}
+                          </p>
+                          {formData.location && (
+                            <p className="text-sm text-green-700">
+                              <strong>Location:</strong> {formData.location}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="mt-2 p-2 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <p className="text-sm text-yellow-700">💡 Use the buttons above to set location coordinates</p>
+                    </div>
+                  )}
+                  
+                  {/* Editable Coordinates */}
+                  <div className="mt-3 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Latitude *</label>
+                      <input
+                        type="number"
+                        value={formData.coordinates.latitude || ''}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          coordinates: {
+                            ...prev.coordinates,
+                            latitude: e.target.value
+                          }
+                        }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        placeholder="e.g., 19.0760"
+                        step="any"
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs text-gray-600 mb-1">Longitude *</label>
+                      <input
+                        type="number"
+                        value={formData.coordinates.longitude || ''}
+                        onChange={(e) => setFormData(prev => ({
+                          ...prev,
+                          coordinates: {
+                            ...prev.coordinates,
+                            longitude: e.target.value
+                          }
+                        }))}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-purple-500"
+                        placeholder="e.g., 72.8777"
+                        step="any"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
                 
                 <div>
@@ -704,6 +934,16 @@ export default function ReelsManagementPage() {
             </form>
           </div>
         </div>
+      )}
+
+      {/* Location Picker Modal */}
+      {showLocationPicker && (
+        <LocationPicker
+          isOpen={showLocationPicker}
+          onClose={() => setShowLocationPicker(false)}
+          onLocationSelect={handleLocationSelect}
+          title="Select Reel Location"
+        />
       )}
     </div>
   );
