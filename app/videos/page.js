@@ -1,27 +1,26 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { FaPlay, FaPause, FaClock, FaMapMarkerAlt, FaUser, FaHeart, FaShare, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
+import { FaPlay, FaPause, FaClock, FaGraduationCap, FaMapMarkerAlt, FaUser, FaStar, FaHeart, FaShare, FaTimes, FaChevronLeft, FaChevronRight } from 'react-icons/fa';
 import { useAppSelector } from '../store/hooks';
 import { selectCurrentLocation } from '../store/slices/locationSlice';
 
-export default function ShortsPage() {
-  const [reels, setReels] = useState([]);
+export default function VideosPage() {
+  const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [mounted, setMounted] = useState(false);
-  const [playingReel, setPlayingReel] = useState(null);
+  const [playingVideo, setPlayingVideo] = useState(null);
   const [isPlaying, setIsPlaying] = useState(false);
   
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [totalReels, setTotalReels] = useState(0);
-  const reelsPerPage = 12;
+  const [totalVideos, setTotalVideos] = useState(0);
+  const videosPerPage = 12;
   
   // Filter state
   const [viewMode, setViewMode] = useState('local'); // 'local' or 'global'
-  const [category, setCategory] = useState('');
   
   // Get current location from Redux store
   const currentLocation = useAppSelector(selectCurrentLocation);
@@ -32,11 +31,11 @@ export default function ShortsPage() {
 
   useEffect(() => {
     if (mounted) {
-      fetchReels();
+      fetchVideos();
     }
-  }, [mounted, currentPage, viewMode, category, currentLocation]);
+  }, [mounted, currentPage, viewMode, currentLocation]);
 
-  const fetchReels = async () => {
+  const fetchVideos = async () => {
     try {
       setLoading(true);
       setError(null);
@@ -44,7 +43,7 @@ export default function ShortsPage() {
       // Build API parameters
       const params = new URLSearchParams();
       params.append('page', currentPage.toString());
-      params.append('limit', reelsPerPage.toString());
+      params.append('limit', videosPerPage.toString());
       
       // Location filtering
       if (viewMode === 'local' && currentLocation) {
@@ -52,26 +51,23 @@ export default function ShortsPage() {
         params.append('location', location);
       }
       
-      // Category filtering
-      if (category) {
-        params.append('category', category);
-      }
+
       
-      console.log('Fetching reels with params:', params.toString());
+      console.log('Fetching videos with params:', params.toString());
       
-      const response = await fetch(`/api/reels?${params.toString()}`);
+      const response = await fetch(`/api/videos?${params.toString()}`);
       const data = await response.json();
       
       if (data.success && data.data) {
-        setReels(data.data.reels || []);
+        setVideos(data.data.videos || []);
         setTotalPages(data.data.pagination?.totalPages || 1);
-        setTotalReels(data.data.pagination?.totalReels || 0);
+        setTotalVideos(data.data.pagination?.totalVideos || 0);
       } else {
-        setError('Failed to fetch reels');
+        setError('Failed to fetch videos');
       }
     } catch (err) {
-      console.error('Error fetching reels:', err);
-      setError('Failed to fetch reels');
+      console.error('Error fetching videos:', err);
+      setError('Failed to fetch videos');
     } finally {
       setLoading(false);
     }
@@ -89,45 +85,81 @@ export default function ShortsPage() {
     setCurrentPage(1); // Reset to first page when changing view mode
   };
 
+
+
   const formatDuration = (seconds) => {
     if (!seconds) return '0:00';
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+    }
+    return `${minutes}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const handleVideoClick = (reelId) => {
-    if (playingReel === reelId) {
+  const getCategoryColor = (category) => {
+    const colors = {
+      'educational': 'bg-blue-100 text-blue-800',
+      'medical-procedure': 'bg-red-100 text-red-800',
+      'health-tips': 'bg-green-100 text-green-800',
+      'wellness': 'bg-purple-100 text-purple-800',
+      'patient-story': 'bg-orange-100 text-orange-800',
+      'doctor-interview': 'bg-indigo-100 text-indigo-800',
+      'hospital-tour': 'bg-yellow-100 text-yellow-800',
+      'other': 'bg-gray-100 text-gray-800'
+    };
+    return colors[category] || colors.other;
+  };
+
+  const getDifficultyColor = (difficulty) => {
+    const colors = {
+      'beginner': 'bg-green-100 text-green-800',
+      'intermediate': 'bg-yellow-100 text-yellow-800',
+      'advanced': 'bg-red-100 text-red-800'
+    };
+    return colors[difficulty] || colors.beginner;
+  };
+
+  const handleVideoClick = (videoId) => {
+    if (playingVideo === videoId) {
       setIsPlaying(!isPlaying);
     } else {
-      setPlayingReel(reelId);
+      setPlayingVideo(videoId);
       setIsPlaying(true);
     }
   };
 
   const handleVideoEnded = () => {
     setIsPlaying(false);
-    setPlayingReel(null);
+    setPlayingVideo(null);
   };
 
-  const handleCloseVideo = (reelId, e) => {
+  const handleCloseVideo = (videoId, e) => {
     e.stopPropagation();
     setIsPlaying(false);
-    setPlayingReel(null);
+    setPlayingVideo(null);
   };
 
-  const extractVideoId = (url) => {
-    if (!url) return null;
+  const extractVideoId = (iframeUrl) => {
+    if (!iframeUrl) return null;
     
-    if (url.includes('<iframe')) {
-      const srcMatch = url.match(/src="([^"]+)"/);
-      if (srcMatch) url = srcMatch[1];
+    if (iframeUrl.includes('<iframe')) {
+      const srcMatch = iframeUrl.match(/src="([^"]+)"/);
+      if (srcMatch) iframeUrl = srcMatch[1];
     }
     
-    const youtubeMatch = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-    if (youtubeMatch) return youtubeMatch[1];
+    const patterns = [
+      /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([^&\n?#]+)/,
+      /src="[^"]*\/embed\/([^"?]+)/
+    ];
     
-    return url;
+    for (const pattern of patterns) {
+      const match = iframeUrl.match(pattern);
+      if (match) return match[1];
+    }
+    return iframeUrl;
   };
 
   const isYouTubeUrl = (url) => {
@@ -143,9 +175,9 @@ export default function ShortsPage() {
   const getTitle = () => {
     if (viewMode === 'local') {
       const locationName = currentLocation?.city || currentLocation?.name || 'Local';
-      return `${locationName} Medical Shorts`;
+      return `${locationName} Medical Videos`;
     }
-    return 'Global Medical Shorts';
+    return 'Global Medical Videos';
   };
 
   const renderPagination = () => {
@@ -227,13 +259,17 @@ export default function ShortsPage() {
 
   const renderSkeletons = () => (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-      {Array.from({ length: reelsPerPage }).map((_, i) => (
-        <div key={i} className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow w-full h-[500px] animate-pulse">
+      {Array.from({ length: videosPerPage }).map((_, i) => (
+        <div key={i} className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow w-full h-[520px] animate-pulse">
           <div className="h-96 bg-gray-300 rounded-t-4xl"></div>
           <div className="flex-col flex-1 p-4">
             <div className="h-6 bg-gray-300 rounded mb-2"></div>
             <div className="h-4 bg-gray-300 rounded mb-2"></div>
-            <div className="h-4 bg-gray-300 rounded w-3/4"></div>
+            <div className="h-4 bg-gray-300 rounded w-3/4 mb-2"></div>
+            <div className="flex space-x-2">
+              <div className="h-6 bg-gray-300 rounded-full w-16"></div>
+              <div className="h-6 bg-gray-300 rounded-full w-20"></div>
+            </div>
           </div>
         </div>
       ))}
@@ -245,7 +281,7 @@ export default function ShortsPage() {
       <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto">
           <div className="pt-8 pb-4">
-            <h1 className="text-3xl font-bold text-center text-gray-900">Loading Medical Shorts...</h1>
+            <h1 className="text-3xl font-bold text-center text-gray-900">Loading Medical Videos...</h1>
           </div>
           {renderSkeletons()}
         </div>
@@ -288,12 +324,14 @@ export default function ShortsPage() {
             </div>
           </div>
 
+
+
           {/* Results Info */}
           <div className="text-center text-gray-600 mb-4">
             {loading ? (
-              'Loading reels...'
+              'Loading videos...'
             ) : (
-              `Showing ${reels.length} of ${totalReels} reels ${viewMode === 'local' ? `in ${currentLocation?.city || currentLocation?.name || 'your area'}` : 'globally'}`
+              `Showing ${videos.length} of ${totalVideos} videos ${viewMode === 'local' ? `in ${currentLocation?.city || currentLocation?.name || 'your area'}` : 'globally'}`
             )}
           </div>
         </div>
@@ -304,23 +342,23 @@ export default function ShortsPage() {
         ) : error ? (
           <div className="p-6 text-center">
             <div className="bg-red-50 border border-red-200 rounded-lg p-6 max-w-md mx-auto">
-              <p className="text-red-600 font-medium">Unable to load reels</p>
+              <p className="text-red-600 font-medium">Unable to load videos</p>
               <p className="text-red-500 text-sm mt-2">{error}</p>
               <button
-                onClick={fetchReels}
+                onClick={fetchVideos}
                 className="mt-4 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
               >
                 Try Again
               </button>
             </div>
           </div>
-        ) : reels.length === 0 ? (
+        ) : videos.length === 0 ? (
           <div className="p-6 text-center">
             <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 max-w-md mx-auto">
-              <p className="text-gray-600 font-medium">No reels found</p>
+              <p className="text-gray-600 font-medium">No videos found</p>
               <p className="text-gray-500 text-sm mt-2">
                 {viewMode === 'local' 
-                  ? 'Try switching to global view or check back later for new content in your area.'
+                  ? 'Try switching to global view or check back later for new content.'
                   : 'Check back later for new content.'
                 }
               </p>
@@ -328,26 +366,26 @@ export default function ShortsPage() {
           </div>
         ) : (
           <>
-            {/* Reels Grid */}
+            {/* Videos Grid */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 p-6">
-              {reels.map((reel) => (
+              {videos.map((video) => (
                 <div 
-                  key={reel._id} 
-                  className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow w-full h-[500px] hover:shadow-lg transition-shadow duration-300"
+                  key={video._id} 
+                  className="flex-col flex bg-[#f2f1f9] rounded-4xl shadow w-full h-[360px] hover:shadow-lg transition-shadow duration-300"
                 >
                   <div className="relative flex-shrink-0">
-                    {playingReel === reel._id ? (
-                      <div className="relative w-full h-96 rounded-t-4xl overflow-hidden bg-black">
-                        {(reel.iframeLink || reel.iframeUrl) && isYouTubeUrl(reel.iframeLink || reel.iframeUrl) ? (
+                    {playingVideo === video._id ? (
+                      <div className="relative w-full h-64 rounded-t-4xl overflow-hidden bg-black">
+                        {(video.iframeUrl || video.iframeLink) && isYouTubeUrl(video.iframeUrl || video.iframeLink) ? (
                           <iframe
-                            src={`https://www.youtube.com/embed/${extractVideoId(reel.iframeLink || reel.iframeUrl)}?autoplay=${isPlaying ? 1 : 0}&controls=1&rel=0&modestbranding=1`}
-                            title={reel.title}
+                            src={`https://www.youtube.com/embed/${extractVideoId(video.iframeUrl || video.iframeLink)}?autoplay=${isPlaying ? 1 : 0}&controls=1&rel=0&modestbranding=1`}
+                            title={video.title}
                             className="w-full h-full"
                             frameBorder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen
                           ></iframe>
-                        ) : (reel.iframeLink || reel.iframeUrl) ? (
+                        ) : (video.iframeUrl || video.iframeLink) ? (
                           <video
                             className="w-full h-full object-cover"
                             controls
@@ -355,9 +393,9 @@ export default function ShortsPage() {
                             onEnded={handleVideoEnded}
                             preload="metadata"
                           >
-                            <source src={reel.iframeLink || reel.iframeUrl} type="video/mp4" />
-                            <source src={reel.iframeLink || reel.iframeUrl} type="video/webm" />
-                            <source src={reel.iframeLink || reel.iframeUrl} type="video/ogg" />
+                            <source src={video.iframeUrl || video.iframeLink} type="video/mp4" />
+                            <source src={video.iframeUrl || video.iframeLink} type="video/webm" />
+                            <source src={video.iframeUrl || video.iframeLink} type="video/ogg" />
                             Your browser does not support the video tag.
                           </video>
                         ) : (
@@ -365,10 +403,10 @@ export default function ShortsPage() {
                             <p className="text-center px-4">Video not available</p>
                           </div>
                         )}
-                        {(reel.iframeLink || reel.iframeUrl) && !isYouTubeUrl(reel.iframeLink || reel.iframeUrl) && (
+                        {(video.iframeUrl || video.iframeLink) && !isYouTubeUrl(video.iframeUrl || video.iframeLink) && (
                           <div 
                             className="absolute inset-0 bg-black/20 hover:bg-black/30 flex items-center justify-center cursor-pointer transition-colors opacity-0 hover:opacity-100"
-                            onClick={() => handleVideoClick(reel._id)}
+                            onClick={() => handleVideoClick(video._id)}
                           >
                             <div className="bg-white/90 rounded-full p-3">
                               {isPlaying ? (
@@ -382,17 +420,17 @@ export default function ShortsPage() {
                       </div>
                     ) : (
                       <div 
-                        className="relative w-full h-96 cursor-pointer group"
-                        onClick={() => handleVideoClick(reel._id)}
+                        className="relative w-full h-64 cursor-pointer group"
+                        onClick={() => handleVideoClick(video._id)}
                       >
-                        {reel.thumbnail ? (
+                        {video.thumbnail ? (
                           <img 
-                            src={reel.thumbnail} 
-                            alt={reel.title}
-                            className="w-full h-96 object-cover rounded-t-4xl group-hover:opacity-90 transition-opacity"
+                            src={video.thumbnail} 
+                            alt={video.title}
+                            className="w-full h-64 object-cover rounded-t-4xl group-hover:opacity-90 transition-opacity"
                           />
                         ) : (
-                          <div className="w-full h-96 bg-gradient-to-br from-purple-400 to-purple-600 rounded-t-4xl flex items-center justify-center">
+                          <div className="w-full h-64 bg-gradient-to-br from-purple-400 to-purple-600 rounded-t-4xl flex items-center justify-center">
                             <FaPlay className="text-white text-4xl" />
                           </div>
                         )}
@@ -404,26 +442,31 @@ export default function ShortsPage() {
                       </div>
                     )}
                     
-                    {playingReel === reel._id ? (
+                    {playingVideo === video._id ? (
                       <div className="absolute top-2 right-2">
                         <button
-                          onClick={(e) => handleCloseVideo(reel._id, e)}
+                          onClick={(e) => handleCloseVideo(video._id, e)}
                           className="bg-white/90 hover:bg-white text-gray-600 hover:text-gray-800 rounded-full p-2 transition-colors"
                         >
                           <FaTimes className="w-3 h-3" />
                         </button>
                       </div>
                     ) : (
-                      <div className="absolute top-2 right-2 bg-white/90 px-2 py-1 rounded-full text-xs text-gray-600">
-                        {reel.category}
-                      </div>
+                      <>
+                        {video.category && (
+                          <div className={`absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-medium ${getCategoryColor(video.category)}`}>
+                            {video.category.replace('-', ' ')}
+                          </div>
+                        )}
+                      </>
                     )}
                     
                     <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded text-xs flex items-center">
                       <FaClock className="w-3 h-3 mr-1" />
-                      {formatDuration(reel.duration)}
+                      {formatDuration(video.duration)}
                     </div>
-                    {reel.isFeatured && (
+                    
+                    {video.isFeatured && (
                       <div className="absolute top-2 left-2 bg-purple-600 text-white px-2 py-1 rounded-full text-xs font-medium">
                         Featured
                       </div>
@@ -432,24 +475,20 @@ export default function ShortsPage() {
                   
                   <div className="flex-col flex-1 p-4 overflow-hidden">
                     <h3 className="text-lg text-black font-bold line-clamp-2 mb-2 break-words">
-                      {truncateText(reel.title, 60)}
+                      {truncateText(video.title, 60)}
                     </h3>
+                    
                     <div className="flex items-center justify-between mb-2 text-xs">
                       <div className="flex items-center text-purple-600 font-medium">
                         <FaMapMarkerAlt className="w-3 h-3 mr-1" />
-                        <span className="truncate">{reel.location}</span>
+                        <span className="truncate">{video.location}</span>
                       </div>
-                      {reel.author && (
+                      {video.author && (
                         <span className="text-gray-500 truncate ml-2">
-                          Dr. {reel.author.firstName} {reel.author.lastName}
+                          Dr. {video.author.firstName} {video.author.lastName}
                         </span>
                       )}
                     </div>
-                    {reel.description && (
-                      <p className="text-gray-600 text-sm line-clamp-2">
-                        {truncateText(reel.description, 80)}
-                      </p>
-                    )}
                   </div>
                 </div>
               ))}

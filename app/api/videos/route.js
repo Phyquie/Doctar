@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import connectDB from '../../../lib/mongodb';
 import Video from '../../../models/Video';
+import Doctor from '../../../models/Doctor';
 
 // GET - Public API to fetch videos filtered by location
 export async function GET(request) {
