@@ -190,37 +190,61 @@ export default function SpecialistPage() {
           </nav>
 
           {/* Header */}
-          <div className="bg-white rounded-xl shadow-sm p-8 mb-8">
+          <div className="bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
             <div className="text-center">
-              <h1 className="text-4xl font-bold text-gray-900 mb-4">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">
                 Medical Specialists
               </h1>
-              <p className="text-xl text-gray-600 mb-6">
+              <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-3 sm:mb-4">
                 Find qualified doctors by their medical specialization
               </p>
-              
-              {/* Search Bar */}
-              <div className="max-w-md mx-auto">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search specializations..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full px-4 py-3 pl-12 pr-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5f4191] focus:border-transparent"
-                  />
-                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                    <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                  </div>
+            </div>
+          </div>
+
+          {/* Search and Filters */}
+          <div className="bg-white rounded-xl shadow-sm p-3 sm:p-6 mb-4 sm:mb-8">
+            {/* Search Bar */}
+            <form onSubmit={(e) => e.preventDefault()} className="mb-3 sm:mb-6">
+              <div className="relative">
+                <input
+                  type="text"
+                  placeholder="Search specializations..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full px-2 sm:px-4 py-2 sm:py-3 pl-8 sm:pl-12 pr-16 sm:pr-24 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5f4191] focus:border-transparent text-xs sm:text-base"
+                />
+                <div className="absolute inset-y-0 left-0 pl-2 sm:pl-4 flex items-center pointer-events-none">
+                  <svg className="w-3 h-3 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
                 </div>
+                <button
+                  type="submit"
+                  className="absolute inset-y-0 right-0 px-2 sm:px-6 bg-[#5f4191] text-white rounded-r-lg hover:bg-[#4d3374] transition-colors text-xs sm:text-sm"
+                >
+                  Search
+                </button>
+              </div>
+            </form>
+
+            {/* Filters */}
+            <div className="flex flex-wrap items-center gap-1 sm:gap-4 mb-3 sm:mb-4">
+              <div className="flex items-center space-x-1 px-2 sm:px-4 py-1.5 sm:py-2 border border-gray-300 rounded-lg text-xs sm:text-sm text-gray-600">
+                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                </svg>
+                <span className="hidden sm:inline">Filters</span>
+              </div>
+
+              {/* Results Count */}
+              <div className="text-xs text-gray-500">
+                {filteredSpecializations.length} specializations found
               </div>
             </div>
           </div>
 
           {/* Specializations Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6">
             {filteredSpecializations.map((specialization, index) => (
               <Link
                 key={specialization.name}
@@ -233,15 +257,15 @@ export default function SpecialistPage() {
                 <div className={`
                   bg-white rounded-xl shadow-sm hover:shadow-xl 
                   transition-all duration-500 ease-out
-                  p-6 border-2 ${specialization.color} 
+                  p-3 sm:p-6 border-2 ${specialization.color} 
                   group-hover:scale-105 group-hover:-translate-y-2
-                  h-64 flex flex-col justify-between
+                  h-48 sm:h-64 flex flex-col justify-between
                   transform hover:rotate-1
                   backdrop-blur-sm
                 `}>
                   <div className="flex flex-col items-center text-center flex-grow">
                     {/* Icon */}
-                    <div className="w-16 h-16 mb-4 relative group-hover:scale-110 transition-transform duration-300">
+                    <div className="w-12 h-12 sm:w-16 sm:h-16 mb-2 sm:mb-4 relative group-hover:scale-110 transition-transform duration-300">
                       <Image
                         src={specialization.icon}
                         alt={specialization.name}
@@ -251,20 +275,20 @@ export default function SpecialistPage() {
                     </div>
                     
                     {/* Name */}
-                    <h3 className="text-lg font-semibold mb-2 group-hover:text-[#5f4191] transition-colors duration-300 min-h-[3.5rem] flex items-center">
+                    <h3 className="text-sm sm:text-lg font-semibold mb-1 sm:mb-2 group-hover:text-[#5f4191] transition-colors duration-300 min-h-[2.5rem] sm:min-h-[3.5rem] flex items-center">
                       {specialization.name}
                     </h3>
                     
                     {/* Description */}
-                    <p className="text-sm text-gray-600 mb-4 line-clamp-2 flex-grow flex items-center min-h-[2.5rem]">
+                    <p className="text-xs sm:text-sm text-gray-600 mb-2 sm:mb-4 line-clamp-2 flex-grow flex items-center min-h-[2rem] sm:min-h-[2.5rem]">
                       {specialization.description}
                     </p>
                   </div>
                   
                   {/* Arrow */}
-                  <div className="flex items-center justify-center text-sm font-medium group-hover:text-[#5f4191] transition-all duration-300 mt-auto pt-4 pb-3 px-6 border-t border-gray-100 group-hover:border-[#5f4191] group-hover:border-opacity-30">
+                  <div className="flex items-center justify-center text-xs sm:text-sm font-medium group-hover:text-[#5f4191] transition-all duration-300 mt-auto pt-2 sm:pt-4 pb-2 sm:pb-3 px-3 sm:px-6 border-t border-gray-100 group-hover:border-[#5f4191] group-hover:border-opacity-30">
                     <span className="group-hover:font-semibold transition-all duration-300">Find Doctors</span>
-                    <svg className="w-4 h-4 ml-2 group-hover:translate-x-2 group-hover:scale-110 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg className="w-3 h-3 sm:w-4 sm:h-4 ml-1 sm:ml-2 group-hover:translate-x-2 group-hover:scale-110 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                     </svg>
                   </div>

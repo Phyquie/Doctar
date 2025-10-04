@@ -26,6 +26,19 @@ export default function DoctorsListPage() {
   const [viewMode, setViewMode] = useState('grid'); // grid or list
   const [initialLoad, setInitialLoad] = useState(true);
 
+  // Force grid view on mobile
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth < 640) { // sm breakpoint
+        setViewMode('grid');
+      }
+    };
+
+    handleResize(); // Set initial state
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Specializations for filter
   const specializations = [
     { name: 'Cardiologist', value: 'cardiology' },
@@ -166,7 +179,7 @@ export default function DoctorsListPage() {
     return Array.from({ length: 5 }, (_, index) => (
       <svg
         key={index}
-        className={`w-4 h-4 ${index < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`}
+        className={`w-3 h-3 sm:w-4 sm:h-4 ${index < Math.floor(rating) ? 'text-yellow-400' : 'text-gray-300'}`}
         fill="currentColor"
         viewBox="0 0 20 20"
       >
@@ -214,20 +227,20 @@ export default function DoctorsListPage() {
       onClick={() => router.push(generatePublicUrl(doctor))}
     >
       {/* Header Section with gradient */}
-      <div className="bg-gradient-to-r from-[#5f4191] to-[#7c5aa3] p-4">
+      <div className="bg-gradient-to-r from-[#5f4191] to-[#7c5aa3] p-2 sm:p-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center space-x-3">
+          <div className="flex items-center space-x-2 sm:space-x-3">
             {/* Doctor Avatar */}
-            <div className="w-16 h-16 relative flex-shrink-0">
+            <div className="w-10 h-10 sm:w-16 sm:h-16 relative flex-shrink-0">
               <Image
                 src={doctor.avatar}
                 alt={doctor.name}
                 fill
-                className="rounded-full object-cover border-3 border-white shadow-lg"
+                className="rounded-full object-cover border-2 sm:border-3 border-white shadow-lg"
               />
               {doctor.isVerified && (
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full flex items-center justify-center border-2 border-white">
-                  <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <div className="absolute -bottom-1 -right-1 w-3 h-3 sm:w-5 sm:h-5 bg-green-500 rounded-full flex items-center justify-center border border-white sm:border-2">
+                  <svg className="w-1.5 h-1.5 sm:w-2.5 sm:h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                   </svg>
                 </div>
@@ -236,73 +249,73 @@ export default function DoctorsListPage() {
             
             {/* Doctor Basic Info */}
             <div className="flex-1">
-              <h3 className="text-lg font-bold text-white truncate">
+              <h3 className="text-sm sm:text-lg font-bold text-white truncate">
                 {doctor.name}
               </h3>
-              <p className="text-purple-100 text-sm font-medium">{doctor.specialization}</p>
+              <p className="text-purple-100 text-xs sm:text-sm font-medium">{doctor.specialization}</p>
             </div>
           </div>
           
           {/* Price Badge */}
-          <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded-lg px-3 py-2">
-            <div className=" text-lg font-bold text-[#5f4191]">₹{doctor.consultationFee}</div>
+          <div className="bg-white bg-opacity-20 backdrop-blur-sm rounded px-2 py-1 sm:px-3 sm:py-2">
+            <div className="text-[#5f4191] text-sm sm:text-lg font-bold">₹{doctor.consultationFee}</div>
             <div className="text-[#5f4191] text-xs">Consultation</div>
           </div>
         </div>
       </div>
 
       {/* Content Section */}
-      <div className="p-5">
+      <div className="p-3 sm:p-5">
         {/* Rating */}
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center space-x-2">
-            <div className="flex items-center space-x-1">
+        <div className="flex items-center justify-between mb-2 sm:mb-4">
+          <div className="flex items-center space-x-1 sm:space-x-2">
+            <div className="flex items-center space-x-0.5 sm:space-x-1">
               {renderStars(doctor.rating)}
             </div>
-            <span className="text-gray-600 text-sm font-medium">
+            <span className="text-gray-600 text-xs sm:text-sm font-medium">
               {doctor.rating.toFixed(1)} ({doctor.reviewCount})
             </span>
           </div>
-          <span className="bg-[#5f4191] bg-opacity-10 text-white px-3 py-1 rounded-full text-xs font-semibold">
-            {doctor.experience} Years Exp
+          <span className="text-[#5f4191] bg-opacity-10 px-2 py-0.5 sm:px-3 sm:py-1 rounded-full text-xs font-semibold bg-white">
+            {doctor.experience}Y
           </span>
         </div>
 
-        {/* Location Info */}
-        <div className="flex items-center space-x-2 mb-4 p-3 bg-gray-50 rounded-lg">
-          <svg className="w-4 h-4 text-[#5f4191] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+        {/* Clinic Info */}
+        <div className="flex items-center space-x-1 sm:space-x-2 mb-2 sm:mb-4 p-2 sm:p-3 bg-gray-50 rounded-lg">
+          <svg className="w-3 h-3 sm:w-4 sm:h-4 text-[#5f4191] flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
           </svg>
-          <span className="text-gray-700 text-sm font-medium truncate">{doctor.location}</span>
+          <span className="text-gray-700 text-xs sm:text-sm font-medium truncate">{doctor.clinicName}</span>
         </div>
 
         {/* Bio Preview */}
         {doctor.bio && (
-          <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
+          <p className="text-gray-600 text-xs sm:text-sm mb-2 sm:mb-4 line-clamp-2 sm:line-clamp-3 leading-relaxed">
             {doctor.bio}
           </p>
         )}
 
         {/* Action Buttons */}
-        <div className="flex space-x-2">
+        <div className="flex space-x-1 sm:space-x-2">
           <button 
-            className="flex-1 bg-[#5f4191] text-white py-3 rounded-xl hover:bg-[#4d3374] transition-all duration-200 text-sm font-semibold shadow-md hover:shadow-lg"
+            className="flex-1 bg-[#5f4191] text-white py-2 sm:py-3 rounded-lg sm:rounded-xl hover:bg-[#4d3374] transition-all duration-200 text-xs sm:text-sm font-semibold shadow-md hover:shadow-lg"
             onClick={(e) => {
               e.stopPropagation();
               router.push(generatePublicUrl(doctor));
             }}
           >
-            View Profile
+            <span className="hidden sm:inline">View Profile</span>
+            <span className="sm:hidden">View</span>
           </button>
           <button 
-            className="px-4 py-3 border-2 border-[#5f4191] text-[#5f4191] rounded-xl hover:bg-[#5f4191] hover:text-white transition-all duration-200 text-sm font-semibold"
+            className="px-2 sm:px-4 py-2 sm:py-3 border-2 border-[#5f4191] text-[#5f4191] rounded-lg sm:rounded-xl hover:bg-[#5f4191] hover:text-white transition-all duration-200 text-xs sm:text-sm font-semibold"
             onClick={(e) => {
               e.stopPropagation();
               // Add booking functionality here
             }}
           >
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
             </svg>
           </button>
@@ -486,27 +499,27 @@ export default function DoctorsListPage() {
     <div className="min-h-screen bg-gray-50">
       <div className="max-w-7xl mx-auto px-4 py-6 sm:py-8">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 md:p-8 mb-6 sm:mb-8">
+        <div className="bg-white rounded-xl shadow-sm p-3 sm:p-4 md:p-6 mb-4 sm:mb-6">
           <div className="text-center">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">Find Your Doctor</h1>
-            <p className="text-base sm:text-lg md:text-xl text-gray-600 mb-4 sm:mb-6">
+            <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2 sm:mb-3">Find Your Doctor</h1>
+            <p className="text-sm sm:text-base md:text-lg text-gray-600 mb-3 sm:mb-4">
               Connect with qualified healthcare professionals in your area
             </p>
-            <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-6 text-xs sm:text-sm text-gray-500">
+            <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 text-xs text-gray-500">
               <div className="flex items-center space-x-1">
-                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>Verified Doctors</span>
               </div>
               <div className="flex items-center space-x-1">
-                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
                 <span>24/7 Available</span>
               </div>
               <div className="flex items-center space-x-1">
-                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                 </svg>
                 <span>Trusted Platform</span>
@@ -515,81 +528,81 @@ export default function DoctorsListPage() {
           </div>
         </div>
 
-        {/* Search and Filters */}
-        <div className="bg-white rounded-xl shadow-sm p-4 sm:p-6 mb-6 sm:mb-8">
-          {/* Search Bar */}
-          <form onSubmit={handleSearch} className="mb-4 sm:mb-6">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search doctors by name, specialization, or location..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-3 sm:px-4 py-2 sm:py-3 pl-10 sm:pl-12 pr-20 sm:pr-24 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5f4191] focus:border-transparent text-sm sm:text-base"
-              />
-              <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
-                <svg className="w-4 h-4 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <button
-                type="submit"
-                className="absolute inset-y-0 right-0 px-3 sm:px-6 bg-[#5f4191] text-white rounded-r-lg hover:bg-[#4d3374] transition-colors text-xs sm:text-sm"
-              >
-                Search
-              </button>
-            </div>
-          </form>
+         {/* Search and Filters */}
+         <div className="bg-white rounded-xl shadow-sm p-3 sm:p-6 mb-4 sm:mb-8">
+           {/* Search Bar */}
+           <form onSubmit={handleSearch} className="mb-3 sm:mb-6">
+             <div className="relative">
+               <input
+                 type="text"
+                 placeholder="Search doctors..."
+                 value={searchTerm}
+                 onChange={(e) => setSearchTerm(e.target.value)}
+                 className="w-full px-2 sm:px-4 py-2 sm:py-3 pl-8 sm:pl-12 pr-16 sm:pr-24 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5f4191] focus:border-transparent text-xs sm:text-base"
+               />
+               <div className="absolute inset-y-0 left-0 pl-2 sm:pl-4 flex items-center pointer-events-none">
+                 <svg className="w-3 h-3 sm:w-5 sm:h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                 </svg>
+               </div>
+               <button
+                 type="submit"
+                 className="absolute inset-y-0 right-0 px-2 sm:px-6 bg-[#5f4191] text-white rounded-r-lg hover:bg-[#4d3374] transition-colors text-xs sm:text-sm"
+               >
+                 Search
+               </button>
+             </div>
+           </form>
 
           {/* Filters */}
-          <div className="flex flex-wrap items-center gap-2 sm:gap-4 mb-4">
+          <div className="flex flex-wrap items-center gap-1 sm:gap-4 mb-3 sm:mb-4">
             <button
               onClick={() => setShowFilters(!showFilters)}
-              className="flex items-center space-x-1 sm:space-x-2 px-3 sm:px-4 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm"
+              className="flex items-center space-x-1 px-2 sm:px-4 py-1.5 sm:py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-xs sm:text-sm"
             >
               <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-              <span>Filters</span>
+              <span className="hidden sm:inline">Filters</span>
             </button>
 
-            {/* View Mode Toggle */}
-            <div className="flex border border-gray-300 rounded-lg overflow-hidden">
+            {/* View Mode Toggle - Hidden on Mobile */}
+            <div className="hidden sm:flex border border-gray-300 rounded-lg overflow-hidden">
               <button
                 onClick={() => setViewMode('grid')}
-                className={`px-2 sm:px-3 py-2 ${viewMode === 'grid' ? 'bg-[#5f4191] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                className={`px-3 py-2 ${viewMode === 'grid' ? 'bg-[#5f4191] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
               >
-                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
                 </svg>
               </button>
               <button
                 onClick={() => setViewMode('list')}
-                className={`px-2 sm:px-3 py-2 ${viewMode === 'list' ? 'bg-[#5f4191] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
+                className={`px-3 py-2 ${viewMode === 'list' ? 'bg-[#5f4191] text-white' : 'bg-white text-gray-600 hover:bg-gray-50'}`}
               >
-                <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
                 </svg>
               </button>
             </div>
 
             {/* Results Count */}
-            <div className="text-xs sm:text-sm text-gray-500">
-              {pagination.total} doctors found
+            <div className="text-xs text-gray-500">
+              {pagination.total} found
             </div>
           </div>
 
           {/* Advanced Filters */}
           {showFilters && (
-            <div className="border-t pt-4 sm:pt-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
+            <div className="border-t pt-3 sm:pt-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-3 sm:mb-4">
                 {/* Specialization Filter */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Specialization</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Specialization</label>
                   <select
                     value={selectedSpecialization}
                     onChange={(e) => setSelectedSpecialization(e.target.value)}
-                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5f4191] focus:border-transparent text-sm"
+                    className="w-full px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#5f4191] focus:border-transparent text-xs sm:text-sm"
                   >
                     <option value="">All Specializations</option>
                     {specializations.map((spec) => (
@@ -600,44 +613,44 @@ export default function DoctorsListPage() {
 
                 {/* Location Filter */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Location</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Location</label>
                   <input
                     type="text"
                     placeholder="Enter location"
                     value={selectedLocation}
                     onChange={(e) => setSelectedLocation(e.target.value)}
-                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5f4191] focus:border-transparent text-sm"
+                    className="w-full px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#5f4191] focus:border-transparent text-xs sm:text-sm"
                   />
                 </div>
 
                 {/* Price Range */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Price Range</label>
-                  <div className="flex space-x-1 sm:space-x-2">
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Price Range</label>
+                  <div className="flex space-x-1">
                     <input
                       type="number"
                       placeholder="Min"
                       value={priceRange.min}
                       onChange={(e) => setPriceRange({...priceRange, min: parseInt(e.target.value) || 0})}
-                      className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5f4191] focus:border-transparent text-sm"
+                      className="w-full px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#5f4191] focus:border-transparent text-xs sm:text-sm"
                     />
                     <input
                       type="number"
                       placeholder="Max"
                       value={priceRange.max}
                       onChange={(e) => setPriceRange({...priceRange, max: parseInt(e.target.value) || 5000})}
-                      className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5f4191] focus:border-transparent text-sm"
+                      className="w-full px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#5f4191] focus:border-transparent text-xs sm:text-sm"
                     />
                   </div>
-                    </div>
+                </div>
 
                 {/* Sort By */}
                 <div>
-                  <label className="block text-xs sm:text-sm font-medium text-gray-700 mb-1 sm:mb-2">Sort By</label>
+                  <label className="block text-xs font-medium text-gray-700 mb-1">Sort By</label>
                   <select
                     value={sortBy}
                     onChange={(e) => setSortBy(e.target.value)}
-                    className="w-full px-2 sm:px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#5f4191] focus:border-transparent text-sm"
+                    className="w-full px-2 py-1.5 sm:py-2 border border-gray-300 rounded-lg focus:ring-1 focus:ring-[#5f4191] focus:border-transparent text-xs sm:text-sm"
                   >
                     <option value="experience">Experience</option>
                     <option value="rating">Rating</option>
@@ -645,27 +658,24 @@ export default function DoctorsListPage() {
                     <option value="name">Name</option>
                   </select>
                 </div>
-                    </div>
+              </div>
 
               <div className="flex justify-end">
                 <button
                   onClick={clearFilters}
-                  className="px-3 sm:px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors text-sm"
+                  className="px-2 sm:px-4 py-1.5 sm:py-2 text-gray-600 hover:text-gray-800 transition-colors text-xs sm:text-sm"
                 >
                   Clear All Filters
                 </button>
               </div>
             </div>
-                    )}
+          )}
                   </div>
 
         {/* Doctors List */}
         {doctors.length > 0 ? (
           <>
-            <div className={`relative ${viewMode === 'grid' 
-              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-4 sm:gap-6 mb-6 sm:mb-8" 
-              : "space-y-4 sm:space-y-6 mb-6 sm:mb-8"
-            }`}>
+        <div className={`relative grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-6 mb-4 sm:mb-8 ${viewMode === 'list' ? 'hidden sm:hidden' : ''}`}>
               {filterLoading && (
                 <div className="absolute inset-0 bg-white bg-opacity-75 flex items-center justify-center z-10 rounded-xl">
                   <div className="flex items-center space-x-3">
@@ -675,11 +685,14 @@ export default function DoctorsListPage() {
                 </div>
               )}
               {doctors.map((doctor) => (
-                viewMode === 'grid' ? (
-                  <DoctorCard key={doctor.id} doctor={doctor} />
-                ) : (
-                  <DoctorListItem key={doctor.id} doctor={doctor} />
-                )
+                <DoctorCard key={doctor.id} doctor={doctor} />
+              ))}
+            </div>
+
+            {/* List View - Desktop Only */}
+            <div className={`hidden sm:block ${viewMode === 'list' ? 'block' : 'hidden'} space-y-3 sm:space-y-6 mb-4 sm:mb-8`}>
+              {doctors.map((doctor) => (
+                <DoctorListItem key={doctor.id} doctor={doctor} />
               ))}
             </div>
 
@@ -689,18 +702,19 @@ export default function DoctorsListPage() {
                 <button
                   onClick={() => handlePageChange(pagination.page - 1)}
                   disabled={pagination.page === 1}
-                  className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                  className="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-xs sm:text-sm"
                 >
-                  Previous
+                  <span className="hidden sm:inline">Previous</span>
+                  <span className="sm:hidden">Prev</span>
                 </button>
                 
-                {Array.from({ length: Math.min(5, pagination.pages) }, (_, i) => {
+                {Array.from({ length: Math.min(3, pagination.pages) }, (_, i) => {
                   const page = i + 1;
                   return (
                     <button 
                       key={page}
                       onClick={() => handlePageChange(page)}
-                      className={`px-2 sm:px-3 py-2 rounded-lg text-sm ${
+                      className={`px-2 sm:px-3 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm ${
                         pagination.page === page
                           ? 'bg-[#5f4191] text-white'
                           : 'border border-gray-300 hover:bg-gray-50'
@@ -714,21 +728,22 @@ export default function DoctorsListPage() {
                 <button
                   onClick={() => handlePageChange(pagination.page + 1)}
                   disabled={pagination.page === pagination.pages}
-                  className="px-2 sm:px-3 py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-sm"
+                  className="px-2 sm:px-3 py-1.5 sm:py-2 border border-gray-300 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-50 text-xs sm:text-sm"
                 >
-                  Next
+                  <span className="hidden sm:inline">Next</span>
+                  <span className="sm:hidden">Next</span>
                 </button>
               </div>
             )}
           </>
         ) : (
           /* No Doctors */
-          <div className="bg-white rounded-xl shadow-sm p-6 sm:p-12 text-center">
-            <svg className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="bg-white rounded-xl shadow-sm p-4 sm:p-12 text-center">
+            <svg className="w-10 h-10 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-3 sm:mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
             </svg>
-            <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-2">No Doctors Found</h3>
-            <p className="text-sm sm:text-base text-gray-600 mb-4">
+            <h3 className="text-base sm:text-xl font-semibold text-gray-900 mb-2">No Doctors Found</h3>
+            <p className="text-xs sm:text-base text-gray-600 mb-3 sm:mb-4">
               {searchTerm || selectedSpecialization || selectedLocation 
                 ? "No doctors match your search criteria. Try adjusting your filters."
                 : "There are no doctors registered in the system yet."
@@ -737,7 +752,7 @@ export default function DoctorsListPage() {
             {(searchTerm || selectedSpecialization || selectedLocation) && (
               <button
                 onClick={clearFilters}
-                className="px-4 py-2 bg-[#5f4191] text-white rounded-lg hover:bg-[#4d3374] transition-colors text-sm sm:text-base"
+                className="px-3 sm:px-4 py-1.5 sm:py-2 bg-[#5f4191] text-white rounded-lg hover:bg-[#4d3374] transition-colors text-xs sm:text-base"
               >
                 Clear Filters
               </button>
