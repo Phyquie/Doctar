@@ -262,7 +262,7 @@ export default function SpecialistPage() {
                   </div>
                   
                   {/* Arrow */}
-                  <div className="flex items-center justify-center text-sm font-medium group-hover:text-[#5f4191] transition-all duration-300 mt-auto pt-2 border-t border-gray-100 group-hover:border-[#5f4191] group-hover:border-opacity-30">
+                  <div className="flex items-center justify-center text-sm font-medium group-hover:text-[#5f4191] transition-all duration-300 mt-auto pt-4 pb-3 px-6 border-t border-gray-100 group-hover:border-[#5f4191] group-hover:border-opacity-30">
                     <span className="group-hover:font-semibold transition-all duration-300">Find Doctors</span>
                     <svg className="w-4 h-4 ml-2 group-hover:translate-x-2 group-hover:scale-110 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />

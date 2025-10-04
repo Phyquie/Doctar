@@ -9,30 +9,58 @@ const queryItems = [
   {
     id: 1,
     label: "Allopathic",
-    icon: "/icons/Query/allopathic.PNG",
+    icon: "/icons/general-physician.svg",
     specialization: "Allopathic",
     apiValue: "allopathic"
   },
   {
     id: 2,
     label: "Ayurveda",
-    icon: "/icons/Query/ayurveda.PNG",
+    icon: "/icons/ayurveda.svg",
     specialization: "Ayurveda",
     apiValue: "ayurveda"
   },
   {
     id: 3,
     label: "Dentist",
-    icon: "/icons/Query/dentist.PNG",
+    icon: "/icons/dentist.svg",
     specialization: "Dentist",
     apiValue: "dentistry"
   },
   {
     id: 4,
     label: "Homeopathy",
-    icon: "/icons/Query/homeopathic.PNG",
+    icon: "/icons/homeopathy.svg",
     specialization: "Homeopathy",
     apiValue: "homeopathy"
+  },
+  {
+    id: 5,
+    label: "Cardiologist",
+    icon: "/icons/cardiologist.svg",
+    specialization: "Cardiologist",
+    apiValue: "cardiology"
+  },
+  {
+    id: 6,
+    label: "Dermatologist",
+    icon: "/icons/dermatologist.svg",
+    specialization: "Dermatologist",
+    apiValue: "dermatology"
+  },
+  {
+    id: 7,
+    label: "Neurologist",
+    icon: "/icons/neurologist.svg",
+    specialization: "Neurologist",
+    apiValue: "neurology"
+  },
+  {
+    id: 8,
+    label: "Orthopedist",
+    icon: "/icons/orthopedist.svg",
+    specialization: "Orthopedist",
+    apiValue: "orthopedics"
   }
 ];
 
@@ -84,20 +112,20 @@ export default function QuerySection() {
       {/* Query Items Grid */}
       <div className="px-4 w-full max-w-full">
         {/* Responsive Grid Layout */}
-        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 gap-4 md:gap-6 lg:gap-8 xl:gap-10">
+        <div className="grid grid-cols-4 sm:grid-cols-4 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-8 gap-4 md:gap-6 lg:gap-8 xl:gap-10">
           {queryItems.map((item) => (
             <div key={item.id} className="flex justify-center">
               <button
                 onClick={() => handleSpecializationClick(item.specialization, item.apiValue)}
                 className="flex flex-col items-center focus:outline-none group"
               >
-                <div className="bg-[#7551B2] w-14 h-14 sm:w-16 sm:h-16 md:w-18 md:h-18 lg:w-20 lg:h-20 rounded-full flex items-center justify-center hover:bg-[#6441a0] transition-all duration-300 transform group-hover:scale-105 shadow-lg">
+                <div className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 rounded-full flex items-center justify-center transition-all duration-300 transform group-hover:scale-105">
                   <Image
                     src={item.icon}
                     alt={item.label}
-                    width={40}
-                    height={40}
-                    className="w-6 h-6 sm:w-8 sm:h-8 md:w-9 md:h-9 lg:w-10 lg:h-10 object-contain"
+                    width={60}
+                    height={60}
+                    className="w-12 h-12 sm:w-14 sm:h-14 md:w-16 md:h-16 lg:w-18 lg:h-18 object-contain"
                     unoptimized
                     onError={(e) => {
                       e.target.onerror = null;
@@ -106,7 +134,7 @@ export default function QuerySection() {
                     }}
                   />
                 </div>
-                <span className="text-gray-700 text-xs sm:text-sm md:text-base font-medium mt-2 group-hover:text-[#7551B2] transition-colors duration-300 text-center max-w-[70px] sm:max-w-[80px] md:max-w-none">
+                <span className="text-gray-700 text-xs sm:text-sm md:text-base font-medium mt-2 group-hover:text-[#7551B2] transition-colors duration-300 text-center max-w-[70px] sm:max-w-[80px] md:max-w-none px-2 pb-3">
                   {item.label}
                 </span>
               </button>
