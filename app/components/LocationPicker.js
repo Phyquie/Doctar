@@ -101,6 +101,7 @@ export default function LocationPicker({ onLocationSelect, currentLocation: prop
   };
 
   const handleQuickSelect = (location) => {
+    console.log('Quick selecting location:', location); // Added debug
     setLocalSelectedLocation(location);
     // Update global location immediately
     dispatch(setLocation(location));
@@ -110,6 +111,7 @@ export default function LocationPicker({ onLocationSelect, currentLocation: prop
 
   const handleConfirmLocation = () => {
     if (selectedLocation) {
+      console.log('Confirming location:', selectedLocation); // Added debug
       // Update global location
       dispatch(setLocation(selectedLocation));
       
