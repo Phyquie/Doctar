@@ -47,9 +47,7 @@ export default function Header() {
     return name.length > 20 ? name.substring(0, 17) + '...' : name;
   };
   
-  // Debug logging
-  console.log("currentLocation in header:", currentLocation);
-  console.log("formatLocationForHeader result:", formatLocationForHeader(currentLocation));
+  // Debug logging removed
   
   // Force re-render when location changes
   const [forceUpdate, setForceUpdate] = useState(0);
@@ -106,26 +104,14 @@ export default function Header() {
             <button
               onClick={() => dispatch(setLocationPickerOpen(!isLocationPickerOpen))}
               className="flex w-[120px] md:w-[140px] items-center gap-2 bg-white hover:bg-white text-black font-medium px-3 py-1 rounded-md transition"
-              title={currentLocation.address || currentLocation.name || 'Click to change location'}
+              title={currentLocation?.address || currentLocation?.name || 'Click to change location'}
               style={{ minHeight: '40px' }}
             >
-              <img
-                src="/icons/location.png"
-                alt="Location"
-                className="flex-shrink-0 w-4 h-4"
-                onError={(e) => {
-                  e.target.onerror = null;
-                  e.target.style.display = 'none';
-                  e.target.parentElement.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="flex-shrink-0 w-4 h-4"><path fill-rule="evenodd" d="M11.54 22.35a.75.75 0 0 0 .92 0c1.14-.87 2.67-2.2 4.04-3.78C18.92 16.82 21 14.2 21 11.25 21 6.7 17.52 3 12.75 3S4.5 6.7 4.5 11.25c0 2.95 2.08 5.57 4.5 7.32 1.37 1.58 2.9 2.9 4.04 3.78Zm1.21-9.6a3 3 0 1 0-4.5-3.9 3 3 0 0 0 4.5 3.9Z" clip-rule="evenodd"></path></svg>';
-                }}
-              />
-              <span className="text-black whitespace-nowrap text-sm bg-yellow-200">
-                {(() => {
-                  const locationText = formatLocationForHeader(currentLocation) || 'Bengaluru';
-                  console.log("Rendering location text:", locationText);
-                  return locationText;
-                })()}
-                <span className="text-red-600 font-bold">TEST</span>
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="flex-shrink-0 w-4 h-4">
+                <path fillRule="evenodd" d="M11.54 22.35a.75.75 0 0 0 .92 0c1.14-.87 2.67-2.2 4.04-3.78C18.92 16.82 21 14.2 21 11.25 21 6.7 17.52 3 12.75 3S4.5 6.7 4.5 11.25c0 2.95 2.08 5.57 4.5 7.32 1.37 1.58 2.9 2.9 4.04 3.78Zm1.21-9.6a3 3 0 1 0-4.5-3.9 3 3 0 0 0 4.5 3.9Z" clipRule="evenodd" />
+              </svg>
+              <span className="text-black text-sm flex-1 truncate" title={formatLocationForHeader(currentLocation) || 'Bengaluru'}>
+                {formatLocationForHeader(currentLocation) || 'Bengaluru'}
               </span>
               <svg
                 xmlns="http://www.w3.org/2000/svg"

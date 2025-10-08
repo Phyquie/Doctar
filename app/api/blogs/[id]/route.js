@@ -1,15 +1,28 @@
 import { NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import { connectDB } from '../../../../lib/mongodb';
 import Blog from '../../../../models/blogsModel';
 
-// GET /api/blogs/[slug] - Get single blog
+// Helper: find a blog by Mongo ObjectId or slug
+async function findBlogByIdOrSlug(idOrSlug) {
+  let blog = null;
+  if (mongoose.Types.ObjectId.isValid(idOrSlug)) {
+    blog = await Blog.findById(idOrSlug);
+  }
+  if (!blog) {
+    blog = await Blog.findOne({ slug: idOrSlug });
+  }
+  return blog;
+}
+
+// GET /api/blogs/[id] - Get single blog by id or slug
 export async function GET(request, { params }) {
   try {
     await connectDB();
     
-    console.log('Fetching blog with slug:', params.id);
-    const blog = await Blog.findOne({ slug: params.id })
-      .populate('author', 'firstName lastName email');
+    const { id } = params;
+    console.log('Fetching blog with id/slug:', id);
+    const blog = await findBlogByIdOrSlug(id)?.populate('author', 'firstName lastName email');
 
     
 
@@ -34,7 +47,7 @@ export async function GET(request, { params }) {
   }
 }
 
-// PUT /api/blogs/[slug] - Update blog
+// PUT /api/blogs/[id] - Update blog by id or slug
 export async function PUT(request, { params }) {
   try {
     await connectDB();
@@ -42,7 +55,8 @@ export async function PUT(request, { params }) {
     const body = await request.json();
     const { heading, description, images } = body;
 
-    const blog = await Blog.findOne({ slug: params.slug });
+    const { id } = params;
+    let blog = await findBlogByIdOrSlug(id);
     if (!blog) {
       return NextResponse.json(
         { success: false, message: 'Blog not found' },
@@ -73,12 +87,13 @@ export async function PUT(request, { params }) {
   }
 }
 
-// DELETE /api/blogs/[slug] - Delete blog
+// DELETE /api/blogs/[id] - Delete blog by id or slug
 export async function DELETE(request, { params }) {
   try {
     await connectDB();
 
-    const blog = await Blog.findOne({ slug: params.slug });
+    const { id } = params;
+    const blog = await findBlogByIdOrSlug(id);
     if (!blog) {
       return NextResponse.json(
         { success: false, message: 'Blog not found' },
@@ -86,7 +101,7 @@ export async function DELETE(request, { params }) {
       );
     }
 
-    await Blog.findOneAndDelete({ slug: params.slug });
+    await Blog.findByIdAndDelete(blog._id);
 
     return NextResponse.json({
       success: true,

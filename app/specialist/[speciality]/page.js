@@ -18,6 +18,7 @@ export default function SpecializationPage() {
   const [error, setError] = useState('');
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedLocation, setSelectedLocation] = useState('');
+  const [selectedGender, setSelectedGender] = useState('');
   const [sortBy, setSortBy] = useState('experience');
   const [priceRange, setPriceRange] = useState({ min: 0, max: 5000 });
   const [showFilters, setShowFilters] = useState(false);
@@ -102,6 +103,7 @@ export default function SpecializationPage() {
     if (initialLoad) {
       const filters = {};
       if (selectedLocation) filters.location = selectedLocation;
+      if (selectedGender) filters.gender = selectedGender;
       if (searchTerm) filters.search = searchTerm;
       if (priceRange.min > 0) filters.minFee = priceRange.min;
       if (priceRange.max < 5000) filters.maxFee = priceRange.max;
@@ -116,6 +118,7 @@ export default function SpecializationPage() {
     if (!initialLoad) {
       const filters = {};
       if (selectedLocation) filters.location = selectedLocation;
+      if (selectedGender) filters.gender = selectedGender;
       if (searchTerm) filters.search = searchTerm;
       if (priceRange.min > 0) filters.minFee = priceRange.min;
       if (priceRange.max < 5000) filters.maxFee = priceRange.max;
@@ -123,7 +126,7 @@ export default function SpecializationPage() {
       
       fetchDoctors(1, filters, false);
     }
-  }, [selectedLocation, searchTerm, priceRange, sortBy, fetchDoctors, initialLoad]);
+  }, [selectedLocation, selectedGender, searchTerm, priceRange, sortBy, fetchDoctors, initialLoad]);
 
   // Handle search
   const handleSearch = (e) => {
@@ -131,6 +134,7 @@ export default function SpecializationPage() {
     const filters = {};
     if (searchTerm) filters.search = searchTerm;
     if (selectedLocation) filters.location = selectedLocation;
+    if (selectedGender) filters.gender = selectedGender;
     if (priceRange.min > 0) filters.minFee = priceRange.min;
     if (priceRange.max < 5000) filters.maxFee = priceRange.max;
     if (sortBy) filters.sortBy = sortBy;
@@ -143,6 +147,7 @@ export default function SpecializationPage() {
     const filters = {};
     if (searchTerm) filters.search = searchTerm;
     if (selectedLocation) filters.location = selectedLocation;
+    if (selectedGender) filters.gender = selectedGender;
     if (priceRange.min > 0) filters.minFee = priceRange.min;
     if (priceRange.max < 5000) filters.maxFee = priceRange.max;
     if (sortBy) filters.sortBy = sortBy;
@@ -155,6 +160,7 @@ export default function SpecializationPage() {
   const clearFilters = () => {
     setSearchTerm('');
     setSelectedLocation('');
+    setSelectedGender('');
     setPriceRange({ min: 0, max: 5000 });
     setSortBy('experience');
     fetchDoctors(1, {}, false);
@@ -592,7 +598,7 @@ export default function SpecializationPage() {
             {/* Advanced Filters */}
             {showFilters && (
               <div className="border-t pt-3 sm:pt-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-4 mb-3 sm:mb-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2 sm:gap-4 mb-3 sm:mb-4">
                   {/* Specialization Filter */}
                   <div>
                     <label className="block text-xs font-medium text-gray-700 mb-1">Specialization</label>
@@ -651,6 +657,52 @@ export default function SpecializationPage() {
                       <option value="fee">Consultation Fee</option>
                       <option value="name">Name</option>
                     </select>
+                  </div>
+
+                  {/* Gender Filter */}
+                  <div>
+                    <label className="block text-xs font-medium text-gray-700 mb-1">Gender</label>
+                    <div className="flex items-center gap-3">
+                      {/* Male */}
+                      <label className="inline-flex items-center gap-1 text-xs sm:text-sm">
+                        <input
+                          type="checkbox"
+                          className="rounded border-gray-300 text-[#5f4191] focus:ring-[#5f4191]"
+                          checked={selectedGender === 'male'}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedGender('male');
+                            else setSelectedGender('');
+                          }}
+                        />
+                        <span>Male</span>
+                      </label>
+                      {/* Female */}
+                      <label className="inline-flex items-center gap-1 text-xs sm:text-sm">
+                        <input
+                          type="checkbox"
+                          className="rounded border-gray-300 text-[#5f4191] focus:ring-[#5f4191]"
+                          checked={selectedGender === 'female'}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedGender('female');
+                            else setSelectedGender('');
+                          }}
+                        />
+                        <span>Female</span>
+                      </label>
+                      {/* Others */}
+                      <label className="inline-flex items-center gap-1 text-xs sm:text-sm">
+                        <input
+                          type="checkbox"
+                          className="rounded border-gray-300 text-[#5f4191] focus:ring-[#5f4191]"
+                          checked={selectedGender === 'other'}
+                          onChange={(e) => {
+                            if (e.target.checked) setSelectedGender('other');
+                            else setSelectedGender('');
+                          }}
+                        />
+                        <span>Others</span>
+                      </label>
+                    </div>
                   </div>
                 </div>
 

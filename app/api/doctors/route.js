@@ -17,6 +17,7 @@ export async function GET(request) {
     const limit = parseInt(searchParams.get('limit')) || 12;
     const page = parseInt(searchParams.get('page')) || 1;
     const skip = (page - 1) * limit;
+  const genderParam = searchParams.get('gender');
     
     // Build query
     const query = { 
@@ -27,6 +28,23 @@ export async function GET(request) {
     // Specialization filter
     if (specialization) {
       query.specialization = { $regex: specialization, $options: 'i' };
+    }
+    if (genderParam) {
+      // Support comma-separated genders and case-insensitive values
+      const rawGenders = genderParam
+        .split(',')
+        .map(g => g.trim().toLowerCase())
+        .map(g => (g === 'others' ? 'other' : g));
+
+      const allowedGenders = ['male', 'female', 'other'];
+      const genders = rawGenders.filter(g => allowedGenders.includes(g));
+
+      if (genders.length === 1) {
+        query.gender = genders[0];
+      } else if (genders.length > 1) {
+        query.gender = { $in: genders };
+      }
+      // If no valid genders remain after filtering, we don't add a gender filter
     }
     
     // Location filter - enhanced to handle city-state combinations and state searches
@@ -127,7 +145,7 @@ export async function GET(request) {
     
     // Find doctors with public data only
     const doctors = await Doctor.find(query)
-      .select('firstName lastName specialization experience avatar rating location consultationFee clinicName bio isProfileVerified isDocumentsVerified')
+      .select('firstName lastName specialization experience avatar rating location consultationFee clinicName bio isProfileVerified isDocumentsVerified gender')
       .sort(sort)
       .skip(skip)
       .limit(limit);
@@ -168,6 +186,7 @@ export async function GET(request) {
       return {
         id: doctor._id,
         name: `Dr. ${firstName} ${lastName}`,
+        gender: doctor.gender || 'other',
         specialization: specialization,
         experience: doctor.experience || 0,
         avatar: doctor.avatar || '/icons/user-placeholder.png',

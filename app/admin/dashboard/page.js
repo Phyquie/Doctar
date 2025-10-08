@@ -12,7 +12,7 @@ const DashboardPage = () => {
   const [stats, setStats] = useState({
     totalUsers: 0,
     totalDoctors: 0,
-    appointments: 0,
+
     totalBlogs: 0,
     totalNews: 0,
     totalReels: 0,
@@ -93,14 +93,6 @@ const DashboardPage = () => {
       changeType: 'positive',
       description: 'Verified medical professionals',
       icon: 'user-md'
-    },
-    {
-      title: 'Appointments',
-      value: stats.appointments.toString(),
-      change: '+15% from last month',
-      changeType: 'positive',
-      description: 'Total bookings this month',
-      icon: 'calendar'
     },
     {
       title: 'Blog Posts',

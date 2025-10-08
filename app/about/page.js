@@ -1,5 +1,7 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import AboutUsDesktop from '../components/aboutUs/aboutUsDesktop';
+import {teamData }from '../components/aboutUs/aboutData';
 
 export default function AboutPage() {
   return (
@@ -8,7 +10,7 @@ export default function AboutPage() {
         <title>About Us - Doctar</title>
         <meta name="description" content="Learn about Doctar's mission to connect patients with the best healthcare providers." />
       </Head>
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gray-200 ">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-12 md:py-16">
           <div className="text-center mb-8 sm:mb-12">
             <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">About Doctar</h1>
@@ -90,6 +92,7 @@ export default function AboutPage() {
               Find a Doctor
             </Link>
           </div>
+          <AboutUsDesktop teamData={teamData} />
         </div>
       </div>
     </>

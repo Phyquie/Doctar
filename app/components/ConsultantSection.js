@@ -1,4 +1,6 @@
 'use client';
+import { useRouter } from "next/navigation";
+
 
 const features = [
   {
@@ -22,6 +24,11 @@ const features = [
 ];
 
 export default function ConsultantSection() {
+  const router = useRouter();
+
+  const handleApplyNow = () => {
+    router.push('/auth/doctor-onboarding');
+  };
   return (
     <div>
       <h3 className="text-center md:hidden text-black font-bold text-xl mb-4">
@@ -59,7 +66,7 @@ export default function ConsultantSection() {
 
         {/* Apply Now Button */}
         <div className="flex justify-end mb-1">
-          <button className="bg-[#5154B5] text-white px-6 border py-2 sm:px-8 sm:py-3 rounded-2xl font-semibold hover:opacity-90 transition-colors text-sm sm:text-base">
+          <button className="bg-[#5154B5] text-white px-6 border py-2 sm:px-8 sm:py-3 rounded-2xl font-semibold hover:opacity-90 transition-colors text-sm sm:text-base" onClick={handleApplyNow}>
             Apply Now
           </button>
         </div>
