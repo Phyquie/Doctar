@@ -1,4 +1,10 @@
+"use client";
+
+import { useState } from "react";
+import AskQuestionModal from "./AskQuestionModal";
+
 function TalkWithExpert() {
+  const [open, setOpen] = useState(false);
   return (
     <div className=" m-2 flex flex-col  bg-[#f2f1f9] rounded-2xl mt-[32px] overflow-hidden">
         <div className="w-full">
@@ -20,10 +26,11 @@ function TalkWithExpert() {
 , innovative problem-solving approaches for achieving shared, impactful, and sustainable .
           </p>
 
-          <button className="bg-black rounded-lg text-white py-3 px-6 text-lg font-medium  hover:bg-gray-800 transition-colors">
+          <button onClick={() => setOpen(true)} className="bg-black rounded-lg text-white py-3 px-6 text-lg font-medium  hover:bg-gray-800 transition-colors">
             Ask a question
           </button>
         </div>
+        <AskQuestionModal isOpen={open} onClose={() => setOpen(false)} />
       </div>
   )
 }

@@ -159,6 +159,14 @@ export default function Header() {
                 <span className="text-white font-medium">Hi,</span>
                 <span className="text-white font-medium">{user?.firstName || 'User'}</span>
               </div>
+              {/* Bookings Tab */}
+              <Link
+                href={role === 'doctor' ? '/doctor-dashboard?tab=bookings' : '/patient-profile/bookings'}
+                className="hidden md:inline-flex items-center px-3 py-2 bg-white/10 hover:bg-white/20 text-white rounded-md transition-colors ml-2"
+                title="Bookings"
+              >
+                Bookings
+              </Link>
               <button
                 onClick={() => {
                   const profileUrl = role === 'doctor' ? '/doctor-profile' : 
@@ -248,6 +256,20 @@ export default function Header() {
 
                   {/* Menu Items */}
                   <div className="p-2 space-y-1">
+                    <button
+                      onClick={() => {
+                        const url = role === 'doctor' ? '/doctor-dashboard?tab=bookings' : '/patient-profile/bookings';
+                        window.location.href = url;
+                        setIsMenuOpen(false);
+                      }}
+                      className="w-full text-left p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-all duration-200 flex items-center gap-3"
+                    >
+                      <svg width="20" height="20" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M7 11h10v2H7v-2zm0 4h7v2H7v-2z"/>
+                        <path d="M19 4h-1V2h-2v2H8V2H6v2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/>
+                      </svg>
+                      Bookings
+                    </button>
                     <button
                       onClick={() => {
                         const profileUrl = role === 'doctor' ? '/doctor-profile' : 

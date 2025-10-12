@@ -6,7 +6,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import Head from 'next/head';
 import dynamic from 'next/dynamic';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { logout as logoutAction } from '../store/slices/authSlice';
 import FAQSection from '../components/FAQSection';
 import WeeklySchedule from '../components/WeeklySchedule';
 
@@ -18,6 +19,7 @@ const MapComponent = dynamic(() => import('../components/MapComponent'), {
 
 export default function ProtectedDoctorProfilePage() {
   const router = useRouter();
+  const dispatch = useDispatch();
   
   // Redux selectors
   const isAuthenticated = useSelector((state) => state.auth.isAuthenticated);
@@ -36,6 +38,7 @@ export default function ProtectedDoctorProfilePage() {
   const [activeTab, setActiveTab] = useState('about');
   const [showBookingModal, setShowBookingModal] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   // Calculate distance between user location and doctor's location
   const calculateDistance = useCallback((userLat, userLng) => {
@@ -233,6 +236,27 @@ export default function ProtectedDoctorProfilePage() {
     }
   }, [doctor, userLocation, calculateDistance]);
 
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      // Call API to clear any server cookies if used
+      await fetch('/api/auth/logout', { method: 'POST' });
+    } catch (e) {
+      // ignore
+    }
+    // Clear redux state and local storage
+    dispatch(logoutAction());
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('userRole');
+      } catch {}
+    }
+    // Redirect to login
+    router.push('/auth/login');
+  };
+
   const renderStars = (rating) => {
     return Array.from({ length: 5 }, (_, index) => (
       <svg
@@ -364,6 +388,22 @@ export default function ProtectedDoctorProfilePage() {
                         <path fillRule="evenodd" d="M6.267 3.455a3.066 3.066 0 001.745-.723 3.066 3.066 0 013.976 0 3.066 3.066 0 001.745.723 3.066 3.066 0 012.812 2.812c.051.643.304 1.254.723 1.745a3.066 3.066 0 010 3.976 3.066 3.066 0 00-.723 1.745 3.066 3.066 0 01-2.812 2.812 3.066 3.066 0 00-1.745.723 3.066 3.066 0 01-3.976 0 3.066 3.066 0 00-1.745-.723 3.066 3.066 0 01-2.812-2.812 3.066 3.066 0 00-.723-1.745 3.066 3.066 0 010-3.976 3.066 3.066 0 00.723-1.745 3.066 3.066 0 012.812-2.812zm7.44 5.252a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                       <span>Verified</span>
+                    </div>
+                  )}
+
+                  {/* Conditional Logout Button: only if viewing own doctor profile */}
+                  {isAuthenticated && role === 'doctor' && doctor?.id && user?.id === doctor.id && (
+                    <div className="mt-2">
+                      <button
+                        onClick={handleLogout}
+                        disabled={isLoggingOut}
+                        className="inline-flex items-center space-x-2 bg-white/20 hover:bg-white/30 text-white px-3 py-2 rounded-lg text-sm transition-colors"
+                      >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                        </svg>
+                        <span>{isLoggingOut ? 'Logging out...' : 'Logout'}</span>
+                      </button>
                     </div>
                   )}
 

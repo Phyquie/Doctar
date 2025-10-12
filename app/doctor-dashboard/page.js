@@ -1,15 +1,56 @@
+
 'use client';
 
 import ProtectedRoute from '../components/ProtectedRoute';
 import { useAppSelector } from '../store/hooks';
 import { selectUser, selectRole, selectProfile } from '../store/slices/authSlice';
 import { selectCurrentLocation } from '../store/slices/locationSlice';
+import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
+import BookingsList from '../components/BookingsList';
 
 export default function DoctorDashboardPage() {
   const user = useAppSelector(selectUser);
   const role = useAppSelector(selectRole);
   const profile = useAppSelector(selectProfile);
   const currentLocation = useAppSelector(selectCurrentLocation);
+  const searchParams = useSearchParams();
+  const [activeTab, setActiveTab] = useState('overview');
+  const [stats, setStats] = useState({ appointmentsToday: 0, monthAppointments: 0, totalPatients: 0, averageRating: 0 });
+  const [todayList, setTodayList] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [err, setErr] = useState('');
+
+  useEffect(() => {
+    const tab = searchParams.get('tab');
+    if (tab) setActiveTab(tab);
+  }, [searchParams]);
+
+  useEffect(() => {
+    if (!user?._id) return;
+    const controller = new AbortController();
+    const run = async () => {
+      try {
+        setLoading(true);
+        setErr('');
+        const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
+        const res = await fetch('/api/doctor/stats', {
+          headers: token ? { Authorization: `Bearer ${token}` } : {},
+          signal: controller.signal,
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to load stats');
+        setStats(data.stats || {});
+        setTodayList(data.todayAppointments || []);
+      } catch (e) {
+        if (e.name !== 'AbortError') setErr(e.message || 'Failed to load');
+      } finally {
+        setLoading(false);
+      }
+    };
+    run();
+    return () => controller.abort();
+  }, [user?._id]);
 
   return (
     <ProtectedRoute requiredRole="doctor">
@@ -84,7 +125,31 @@ export default function DoctorDashboardPage() {
             </div>
           </div>
 
+          {/* Tabs */}
+          <div className="mb-6">
+            <div className="inline-flex bg-gray-100 rounded-full p-1">
+              {[
+                { id: 'overview', label: 'Overview' },
+                { id: 'bookings', label: 'Bookings' },
+                { id: 'pending', label: 'Pending Requests' },
+              ].map(t => (
+                <button
+                  key={t.id}
+                  onClick={() => setActiveTab(t.id)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${activeTab===t.id ? 'bg-[#5f4191] text-white' : 'text-gray-700 hover:text-gray-900'}`}
+                >
+                  {t.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
           {/* Main Content */}
+          {activeTab === 'bookings' ? (
+            <BookingsList doctorId={user?._id} title="Your Bookings" />
+          ) : activeTab === 'pending' ? (
+            <BookingsList doctorId={user?._id} status="pending" enableDoctorActions title="Pending Requests" />
+          ) : (
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             {/* Left Column */}
             <div className="lg:col-span-2 space-y-8">
@@ -97,61 +162,41 @@ export default function DoctorDashboardPage() {
                   </button>
                 </div>
                 
-                <div className="space-y-4">
-                  <div className="flex items-center p-4 border border-gray-200 rounded-lg">
-                    <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">John Smith</h3>
-                      <p className="text-sm text-gray-600">Follow-up consultation</p>
-                      <p className="text-sm text-gray-500">2:00 PM - 2:30 PM</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                        Confirmed
-                      </span>
-                    </div>
+                {loading ? (
+                  <div className="text-sm text-gray-500">Loading…</div>
+                ) : err ? (
+                  <div className="p-3 bg-red-50 border border-red-200 rounded text-sm text-red-700">{err}</div>
+                ) : todayList.length === 0 ? (
+                  <div className="text-sm text-gray-500">No appointments today.</div>
+                ) : (
+                  <div className="space-y-4">
+                    {todayList.map((it) => {
+                      const s = new Date(it.start);
+                      const e = new Date(it.end);
+                      const timeStr = `${s.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })} - ${e.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`;
+                      const badge = 'bg-green-100 text-green-800';
+                      return (
+                        <div key={it.id} className="flex items-center p-4 border border-gray-200 rounded-lg">
+                          <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mr-4">
+                            <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-gray-900">{it.patientName}</h3>
+                            <p className="text-sm text-gray-600 capitalize">{it.type} • {it.visitType?.replace('-', ' ')}</p>
+                            <p className="text-sm text-gray-500">{timeStr}</p>
+                          </div>
+                          <div className="text-right">
+                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge}`}>
+                              Confirmed
+                            </span>
+                          </div>
+                        </div>
+                      );
+                    })}
                   </div>
-
-                  <div className="flex items-center p-4 border border-gray-200 rounded-lg">
-                    <div className="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center mr-4">
-                      <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">Sarah Johnson</h3>
-                      <p className="text-sm text-gray-600">Initial consultation</p>
-                      <p className="text-sm text-gray-500">3:30 PM - 4:00 PM</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                        Pending
-                      </span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center p-4 border border-gray-200 rounded-lg">
-                    <div className="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center mr-4">
-                      <svg className="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                      </svg>
-                    </div>
-                    <div className="flex-1">
-                      <h3 className="font-semibold text-gray-900">Michael Brown</h3>
-                      <p className="text-sm text-gray-600">Online consultation</p>
-                      <p className="text-sm text-gray-500">4:30 PM - 5:00 PM</p>
-                    </div>
-                    <div className="text-right">
-                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                        Online
-                      </span>
-                    </div>
-                  </div>
-                </div>
+                )}
               </div>
 
               {/* Recent Patients */}
@@ -246,20 +291,20 @@ export default function DoctorDashboardPage() {
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Total Patients</span>
-                    <span className="font-semibold text-gray-900">156</span>
+                    <span className="font-semibold text-gray-900">{stats.totalPatients ?? 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Appointments Today</span>
-                    <span className="font-semibold text-gray-900">8</span>
+                    <span className="font-semibold text-gray-900">{stats.appointmentsToday ?? 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">This Month</span>
-                    <span className="font-semibold text-gray-900">124</span>
+                    <span className="font-semibold text-gray-900">{stats.monthAppointments ?? 0}</span>
                   </div>
                   <div className="flex justify-between items-center">
                     <span className="text-sm text-gray-600">Average Rating</span>
                     <div className="flex items-center">
-                      <span className="font-semibold text-gray-900 mr-1">4.8</span>
+                      <span className="font-semibold text-gray-900 mr-1">{stats.averageRating ?? 0}</span>
                       <div className="flex text-yellow-400">
                         {[...Array(5)].map((_, i) => (
                           <svg key={i} className="w-4 h-4 fill-current" viewBox="0 0 20 20">
@@ -317,6 +362,7 @@ export default function DoctorDashboardPage() {
               </div>
             </div>
           </div>
+          )}
         </div>
       </div>
     </ProtectedRoute>

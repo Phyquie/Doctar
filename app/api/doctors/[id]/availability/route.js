@@ -1,14 +1,17 @@
 import { NextResponse } from 'next/server';
 import { connectDB } from '../../../../../lib/mongodb';
 import Doctor from '../../../../../models/Doctor';
+import Booking from '../../../../../models/bookingModel';
 
 export async function GET(request, { params }) {
   try {
     await connectDB();
     
     const { id } = await params;
-    const { searchParams } = new URL(request.url);
-    const date = searchParams.get('date'); // Format: YYYY-MM-DD
+  const { searchParams } = new URL(request.url);
+  const date = searchParams.get('date'); // Format: YYYY-MM-DD
+  const blockPendingParam = searchParams.get('blockPending');
+  const blockPending = blockPendingParam === null ? true : blockPendingParam !== 'false';
     
     if (!id) {
       return NextResponse.json(
@@ -30,12 +33,27 @@ export async function GET(request, { params }) {
     console.log('Doctor weeklyAvailability:', doctor.weeklyAvailability);
     
     // Get current date if no date specified
-    const targetDate = date ? new Date(date) : new Date();
+  const targetDate = date ? new Date(date) : new Date();
     const dayOfWeek = targetDate.toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
     
     console.log('Target date:', targetDate);
     console.log('Day of week:', dayOfWeek);
     
+    // Enforce booking window of next 15 days
+    const today = new Date();
+    today.setHours(0,0,0,0);
+    const lastBookable = new Date(today);
+    lastBookable.setDate(lastBookable.getDate() + 15);
+    if (targetDate < today || targetDate > lastBookable) {
+      return NextResponse.json({
+        success: true,
+        available: false,
+        message: 'Bookings are available only for the next 15 days',
+        timeSlots: [],
+        weeklySchedule: getWeeklyScheduleFromDoctor(doctor.weeklyAvailability, 15)
+      });
+    }
+
     // Get doctor's availability for the specific day
     const dayAvailability = doctor.weeklyAvailability?.[dayOfWeek];
     
@@ -64,6 +82,30 @@ export async function GET(request, { params }) {
       });
     }
     
+    // Preload booked slots for the target date
+    const startOfDay = new Date(targetDate);
+    startOfDay.setHours(0,0,0,0);
+    const endOfDay = new Date(targetDate);
+    endOfDay.setHours(23,59,59,999);
+
+    const statuses = blockPending ? ['booked', 'pending'] : ['booked'];
+    const bookings = await Booking.find({
+      doctor: doctor._id,
+      status: { $in: statuses },
+      slotStart: { $gte: startOfDay, $lte: endOfDay }
+    }).select('slotStart slotEnd status');
+    // Build a set of all 15-min increments that are blocked
+    const bookedKeySet = new Set();
+    for (const b of bookings) {
+      const cur = new Date(b.slotStart);
+      const end = new Date(b.slotEnd || b.slotStart);
+      while (cur < end) {
+        const key = `${cur.getHours().toString().padStart(2,'0')}:${cur.getMinutes().toString().padStart(2,'0')}`;
+        bookedKeySet.add(key);
+        cur.setMinutes(cur.getMinutes() + 15);
+      }
+    }
+
     // Generate time slots based on doctor's availability
     const generateTimeSlots = (timeSlots) => {
       const slots = [];
@@ -87,16 +129,19 @@ export async function GET(request, { params }) {
           const slotDateTime = new Date(targetDate);
           slotDateTime.setHours(current.getHours(), current.getMinutes());
           
-          const isAvailable = !isToday || slotDateTime > new Date();
+          const isAvailable = (!isToday || slotDateTime > new Date());
+
+          const key = `${current.getHours().toString().padStart(2,'0')}:${current.getMinutes().toString().padStart(2,'0')}`;
+          const isBooked = bookedKeySet.has(key); // booked or pending blocks the slot
           
           slots.push({
             time: timeString,
-            available: isAvailable,
-            booked: false // TODO: Check actual bookings from appointments
+            available: isAvailable && !isBooked,
+            booked: isBooked
           });
           
-          // Add 30 minutes to current time
-          current.setMinutes(current.getMinutes() + 30);
+          // Add 15 minutes to current time
+          current.setMinutes(current.getMinutes() + 15);
         }
       });
       
@@ -111,7 +156,7 @@ export async function GET(request, { params }) {
       date: targetDate.toISOString().split('T')[0],
       dayOfWeek: dayOfWeek.charAt(0).toUpperCase() + dayOfWeek.slice(1),
       timeSlots,
-      weeklySchedule: getWeeklyScheduleFromDoctor(doctor.weeklyAvailability)
+      weeklySchedule: getWeeklyScheduleFromDoctor(doctor.weeklyAvailability, 15)
     });
     
   } catch (error) {
@@ -124,41 +169,42 @@ export async function GET(request, { params }) {
 }
 
 // Helper function to convert 12-hour time to 24-hour time
-function convertTo24Hour(time12h) {
+function convertTo24Hour(input) {
   try {
-    if (!time12h || typeof time12h !== 'string') {
-      console.error('Invalid time format:', time12h);
-      return '09:00'; // Default fallback
+    if (!input || typeof input !== 'string') {
+      console.error('Invalid time format:', input);
+      return '09:00';
     }
-    
-    const [time, modifier] = time12h.split(' ');
-    if (!time || !modifier) {
-      console.error('Invalid time format - missing time or modifier:', time12h);
-      return '09:00'; // Default fallback
+    const timeStr = input.trim();
+
+    // If already in 24-hour HH:mm format
+    const m24 = timeStr.match(/^(\d{1,2}):(\d{2})$/);
+    if (m24) {
+      let [_, h, m] = m24;
+      const hours = h.padStart(2, '0');
+      const minutes = m.padStart(2, '0');
+      return `${hours}:${minutes}`;
     }
-    
-    let [hours, minutes] = time.split(':');
-    if (!hours || !minutes) {
-      console.error('Invalid time format - missing hours or minutes:', time12h);
-      return '09:00'; // Default fallback
+
+    // If 12-hour format with AM/PM
+    const parts = timeStr.split(' ');
+    if (parts.length === 2) {
+      const [time, modifierRaw] = parts;
+      let [hours, minutes] = time.split(':');
+      if (!hours || !minutes) return '09:00';
+      let mod = (modifierRaw || '').toUpperCase();
+      if (hours === '12') hours = '00';
+      if (mod === 'PM') hours = String(parseInt(hours, 10) + 12);
+      hours = hours.toString().padStart(2, '0');
+      minutes = minutes.toString().padStart(2, '0');
+      return `${hours}:${minutes}`;
     }
-    
-    if (hours === '12') {
-      hours = '00';
-    }
-    
-    if (modifier.toUpperCase() === 'PM') {
-      hours = parseInt(hours, 10) + 12;
-    }
-    
-    // Ensure two-digit format
-    hours = hours.toString().padStart(2, '0');
-    minutes = minutes.padStart(2, '0');
-    
-    return `${hours}:${minutes}`;
+
+    console.error('Unrecognized time format:', input);
+    return '09:00';
   } catch (error) {
-    console.error('Error converting time:', time12h, error);
-    return '09:00'; // Default fallback
+    console.error('Error converting time:', input, error);
+    return '09:00';
   }
 }
 
@@ -178,9 +224,9 @@ function getDefaultTimeSlots() {
 }
 
 // Helper function to get default weekly schedule
-function getDefaultWeeklySchedule() {
+function getDefaultWeeklySchedule(days = 7) {
   const schedule = [];
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < days; i++) {
     const date = new Date();
     date.setDate(date.getDate() + i);
     
@@ -199,9 +245,9 @@ function getDefaultWeeklySchedule() {
 }
 
 // Helper function to generate weekly schedule from doctor's availability
-function getWeeklyScheduleFromDoctor(weeklyAvailability) {
+function getWeeklyScheduleFromDoctor(weeklyAvailability, days = 7) {
   const schedule = [];
-  for (let i = 0; i < 7; i++) {
+  for (let i = 0; i < days; i++) {
     const date = new Date();
     date.setDate(date.getDate() + i);
     

@@ -1,6 +1,7 @@
 'use client';
 
 import HeroSection from './components/HeroSection';
+import AskQuestionModal from './components/AskQuestionModal';
 import QuerySection from './components/QuerySection';
 import DoctorsSection from './components/DoctorsSection';
 import ConsultantSection from './components/ConsultantSection';
@@ -17,8 +18,10 @@ import ReviewsSection from './components/ReviewsSection';
 import Footer from './components/Footer';
 import Image from 'next/image';
 import HomeFAQ from './components/FAQ/HomeFaq';
+import { useState } from 'react';
 
 export default function Home() {
+  const [askOpen, setAskOpen] = useState(false);
   return (
     <div className="min-h-screen relative">
       {/* Purple Header Background - Full Width */}
@@ -88,6 +91,17 @@ export default function Home() {
 
       {/* Footer Section */}
       <Footer />
+
+      {/* Floating Ask button */}
+      <button
+        onClick={() => setAskOpen(true)}
+        className="fixed bottom-6 right-6 z-[150] px-5 py-3 rounded-full bg-[#5f4191] text-white shadow-xl hover:bg-[#4d3374]"
+        aria-label="Ask a Question"
+      >
+        Ask a Question
+      </button>
+
+      <AskQuestionModal isOpen={askOpen} onClose={() => setAskOpen(false)} />
     </div>
   );
 }

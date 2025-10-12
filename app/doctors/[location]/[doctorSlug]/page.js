@@ -9,6 +9,7 @@ import dynamic from 'next/dynamic';
 import { useSelector } from 'react-redux';
 import FAQSection from '../../../components/FAQSection';
 import WeeklySchedule from '../../../components/WeeklySchedule';
+import BookingModal from '../../../components/BookingModal';
 
 // Dynamically import the map components to avoid SSR issues
 const MapComponent = dynamic(() => import('../../../components/MapComponent'), { 
@@ -484,9 +485,9 @@ export default function PublicDoctorProfilePage() {
           <ol className="flex items-center space-x-2 text-sm text-gray-500">
             <li><Link href="/" className="hover:text-[#5f4191]">Home</Link></li>
             <li>/</li>
-            <li><Link href="/doctors" className="hover:text-[#5f4191]">Doctors</Link></li>
+            <li><Link href={`/doctors/${location}`} className="hover:text-[#5f4191]">Doctors</Link></li>
             <li>/</li>
-            <li><Link href={`/doctors?location=${encodeURIComponent(doctor?.location || location)}`} className="hover:text-[#5f4191]">{doctor?.location || location}</Link></li>
+            <li><Link href={`/doctors/${doctor?.location || location}`} className="hover:text-[#5f4191]">{doctor?.location || location}</Link></li>
             <li>/</li>
             <li className="text-gray-900">{doctor?.name || 'Doctor'}</li>
           </ol>
@@ -902,6 +903,14 @@ export default function PublicDoctorProfilePage() {
                             variant="colorful"
                             showInfo={true}
                           />
+                          <div className="pt-2">
+                            <button
+                              onClick={() => setActiveTab('contact') || setShowBookingModal(true)}
+                              className="w-full bg-[#5f4191] text-white px-4 py-3 rounded-lg hover:bg-[#4d3374] transition-colors font-medium"
+                            >
+                              Book Now
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -917,6 +926,14 @@ export default function PublicDoctorProfilePage() {
         <FAQSection 
           doctorName={doctor?.firstName || 'the doctor'} 
           consultationFee={doctor?.consultationFee || '500'} 
+        />
+
+        {/* Booking Modal */}
+        <BookingModal
+          open={showBookingModal}
+          onClose={() => setShowBookingModal(false)}
+          doctor={doctor}
+          onBooked={() => alert('Booking confirmed! Check your email for details.')}
         />
 
         {/* Review Modal */}
